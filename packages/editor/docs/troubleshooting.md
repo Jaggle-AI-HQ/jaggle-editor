@@ -4,14 +4,22 @@
 
 ### `404 Not Found` for `@jaggle-ai/editor`
 
-The package is on npmjs.org. A `.npmrc` or `.yarnrc.yml` that points the `@jaggle-ai` scope at another registry
-sends the request there. Remove that scope setting. (Version 0.1.1 was `@jaggle-ai-hq/editor` on GitHub Packages; it
-isn't on npm.)
+Until it's published to npm, the package is only on GitHub Packages, as `@jaggle-ai-hq/editor`. Install it under the
+alias: `yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0` (see the [README](../README.md#install)).
+
+### `401 Unauthorized` or `404 Not Found` from `npm.pkg.github.com`
+
+- The token needs the `read:packages` scope, from an account with access to the `Jaggle-AI-HQ` organisation. GitHub
+  Packages needs a token even for a public repository.
+- The `@jaggle-ai-hq` scope must point at GitHub Packages (`.npmrc` or `.yarnrc.yml`). Without it, the package manager
+  looks on npmjs.org.
+- In GitHub Actions, the workflow's `GITHUB_TOKEN` can read the package once the package's settings (Manage Actions
+  access) give the repository read access. In Docker builds, pass the token as a build secret, not a build arg.
 
 ### Yarn or pnpm refuses a new version
 
-Both can hold back releases younger than a minimum age. Allow the scope: `npmPreapprovedPackages: ["@jaggle-ai/*"]`
-in `.yarnrc.yml`, or `minimumReleaseAgeExclude: ["@jaggle-ai/*"]` in `pnpm-workspace.yaml`.
+Both can hold back releases younger than a minimum age. Allow our scopes: `npmPreapprovedPackages: ["@jaggle-ai/*",
+"@jaggle-ai-hq/*"]` in `.yarnrc.yml`, or `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
 
 ### Lexical or Yjs is loaded twice
 

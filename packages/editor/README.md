@@ -22,18 +22,45 @@ This README is the reference for installing and for the contracts between apps. 
 
 ## Install
 
-The package is public on npm, under the MIT license. Installing it needs no token or registry setup.
+The package is MIT licensed, and its name is `@jaggle-ai/editor`. For now it is published to **GitHub Packages**. Publishing it publicly to npm is set up (the Publish workflow's `npm` registry) and needs the repository's `NPM_TOKEN` secret.
 
-A project that holds back new releases needs to allow ours:
-- **Yarn 4** with `npmMinimalAgeGate` (jaggle-app-fe): add `"@jaggle-ai/*"` to `npmPreapprovedPackages` in `.yarnrc.yml`.
-- **pnpm** with `minimumReleaseAge` (Jaggle Office): add `@jaggle-ai/*` to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
+**From GitHub Packages (today).** GitHub Packages only takes the repository owner's scope, so the package is published there as `@jaggle-ai-hq/editor`. Install it under its real name with an alias, so imports already say `@jaggle-ai/editor` and moving to npm later only changes the dependency:
 
-Version 0.1.1 was published privately as `@jaggle-ai-hq/editor` on GitHub Packages. From 0.2.0 it is `@jaggle-ai/editor` on npm.
+```bash
+yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0
+```
+
+Installing from GitHub Packages needs a token with `read:packages`: a personal token locally, a CI secret in pipelines and Docker builds. It needs one even though the repository is public.
+
+- **Yarn 4 (jaggle-app-fe)**, in `.yarnrc.yml`:
+
+  ```yaml
+  npmScopes:
+    jaggle-ai-hq:
+      npmRegistryServer: "https://npm.pkg.github.com"
+      npmAlwaysAuth: true
+      npmAuthToken: "${GITHUB_PACKAGES_TOKEN-}"
+  # Our releases are newer than the 7-day age gate.
+  npmPreapprovedPackages:
+    - "@jaggle-ai/*"
+    - "@jaggle-ai-hq/*"
+  ```
+
+- **pnpm / npm (Jaggle Office)**, in `.npmrc`:
+
+  ```ini
+  @jaggle-ai-hq:registry=https://npm.pkg.github.com
+  //npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+  ```
+
+  With pnpm, also add `@jaggle-ai-hq/*` and `@jaggle-ai/*` to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
+
+**From npm (once published).** Install `@jaggle-ai/editor` itself and drop the GitHub Packages settings. No token is needed.
 
 **Peer dependencies.** Install these once, in the app, because there must be a single copy of each:
 
 ```bash
-yarn add @jaggle-ai/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
+yarn add @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
 ```
 
 The version ranges:
@@ -185,9 +212,13 @@ The playground has a few URL parameters:
 
 ## Publish
 
-Run the **Publish Package** workflow (Actions → Publish Package) with a version bump. It does the following:
+Run the **Publish Package** workflow (Actions → Publish Package) with a registry and a version bump:
+- `github`: GitHub Packages, as `@jaggle-ai-hq/editor`, with the workflow's own token
+- `npm`: npm, publicly, as `@jaggle-ai/editor`, with the repository's `NPM_TOKEN` secret
+
+It does the following:
 - runs the checks
-- publishes to npm, publicly (with the repository's `NPM_TOKEN` secret)
+- publishes a copy of the package under that registry's name (the repository keeps `@jaggle-ai/editor`)
 - commits the version
-- tags `@jaggle-ai/editor@x.y.z`
+- tags the published name and version, e.g. `@jaggle-ai-hq/editor@x.y.z`
 - creates a GitHub release

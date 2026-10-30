@@ -2,10 +2,12 @@
 
 ## 0.2.0
 
-Published publicly on npm as `@jaggle-ai/editor`, under the MIT license. The code is the same as 0.1.1, which was
-published privately as `@jaggle-ai-hq/editor` on GitHub Packages. Switch the dependency's name; nothing else changes.
-
+- MIT licensed (it was UNLICENSED), and the repository is public.
+- The package is named `@jaggle-ai/editor`. GitHub Packages only takes the owner's scope, so it is published there as
+  `@jaggle-ai-hq/editor`: install it under the alias `@jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0`. Publishing
+  to npm as `@jaggle-ai/editor` is set up and needs the `NPM_TOKEN` secret.
 - The editor's query keys now start with `"@jaggle-ai/editor"` (`EDITOR_QUERY_KEY`).
+- The code is otherwise the same as 0.1.1.
 
 ## 0.1.1
 

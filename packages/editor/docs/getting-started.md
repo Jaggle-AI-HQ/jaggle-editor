@@ -5,11 +5,20 @@ This guide adds a working editor to a React 19 app in five steps. It starts with
 
 ## 1. Install the package and its peers
 
-The package is public on npm, so no registry setup or token is needed. Install the editor and its peer dependencies.
-Each peer must exist once in the app:
+For now the package is on GitHub Packages, published as `@jaggle-ai-hq/editor`. Installing needs the `@jaggle-ai-hq`
+registry and a token with `read:packages`; the [package README](../README.md#install) has the `.yarnrc.yml` and `.npmrc`
+setup. Install it under its real name with an alias, so imports say `@jaggle-ai/editor`:
 
 ```bash
-npm install @jaggle-ai/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
+yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0
+```
+
+Once it's on npm, install `@jaggle-ai/editor` itself, with no token.
+
+Then install the peer dependencies. Each peer must exist once in the app:
+
+```bash
+npm install @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
 ```
 
 Keep `lexical` and every `@lexical/*` package on the same `0.51.x` version. Mixed versions break the editor at
