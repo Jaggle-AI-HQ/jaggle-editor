@@ -1,6 +1,6 @@
 # jaggle-editor
 
-Jaggle's shared rich-text editor, published privately as [`@jaggle-ai-hq/editor`](packages/editor/README.md), for Jaggle AI (jaggle-app-fe) and Jaggle Office.
+Jaggle's shared rich-text editor, published privately as [`@jaggle-ai/editor`](packages/editor/README.md), for Jaggle AI (jaggle-app-fe) and Jaggle Office.
 
 - `packages/editor`: the package. Its README covers installing it, styles, adapters and the contracts between apps.
 - `apps/playground`: a Vite app that uses the package the way an app would, with in-memory adapters.

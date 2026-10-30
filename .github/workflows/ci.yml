@@ -31,4 +31,4 @@ jobs:
       - run: npm run check
 
       - name: Package contents
-        run: npm pack --dry-run -w @jaggle-ai-hq/editor
+        run: npm pack --dry-run -w @jaggle-ai/editor

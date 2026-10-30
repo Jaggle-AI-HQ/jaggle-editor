@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+Published publicly on npm as `@jaggle-ai/editor`, under the MIT license. The code is the same as 0.1.1, which was
+published privately as `@jaggle-ai-hq/editor` on GitHub Packages. Switch the dependency's name; nothing else changes.
+
+- The editor's query keys now start with `"@jaggle-ai/editor"` (`EDITOR_QUERY_KEY`).
+
 ## 0.1.1
 
 First version. The source is jaggle-app-fe's `src/components/lexical/core`, taken at `origin/dev` `ac0f887caddaba50a02b17afa94d7c3ebca3beed` (2026-10-30). Editor changes made in jaggle-app-fe after that commit need porting here until jaggle-app-fe uses this package.

@@ -5,7 +5,7 @@ import { createContext, type ReactNode, useContext } from "react";
 import type { EditorAdapters, EditorNotify } from "./types";
 
 /** Every query the editor runs starts with this, apart from the app's own. */
-export const EDITOR_QUERY_KEY = "@jaggle-ai-hq/editor";
+export const EDITOR_QUERY_KEY = "@jaggle-ai/editor";
 
 const NO_ADAPTERS: EditorAdapters = { currentUser: null };
 

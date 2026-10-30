@@ -5,13 +5,11 @@ This guide adds a working editor to a React 19 app in five steps. It starts with
 
 ## 1. Install the package and its peers
 
-The package is on GitHub Packages, so the package manager needs the `@jaggle-ai-hq` registry and a token with
-`read:packages`. The [package README](../README.md#install) has the `.yarnrc.yml` and `.npmrc` setup.
-
-Then install the editor and its peer dependencies. Each peer must exist once in the app:
+The package is public on npm, so no registry setup or token is needed. Install the editor and its peer dependencies.
+Each peer must exist once in the app:
 
 ```bash
-npm install @jaggle-ai-hq/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
+npm install @jaggle-ai/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
 ```
 
 Keep `lexical` and every `@lexical/*` package on the same `0.51.x` version. Mixed versions break the editor at
@@ -23,8 +21,8 @@ In the app's main stylesheet, after `@import "tailwindcss"`:
 
 ```css
 @import "tw-animate-css";
-@import "@jaggle-ai-hq/editor/styles.css";
-@source "../node_modules/@jaggle-ai-hq/editor/dist"; /* path from this CSS file */
+@import "@jaggle-ai/editor/styles.css";
+@source "../node_modules/@jaggle-ai/editor/dist"; /* path from this CSS file */
 ```
 
 The editor uses the standard shadcn/ui theme variables (`--background`, `--primary`, `--border`…). An app built on
@@ -43,7 +41,7 @@ Only `currentUser` is required. Every other adapter turns on a feature (mentions
 
 import { useMemo, type ReactNode } from "react";
 
-import { EditorProvider, type EditorAdapters, type EditorUser } from "@jaggle-ai-hq/editor";
+import { EditorProvider, type EditorAdapters, type EditorUser } from "@jaggle-ai/editor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -70,7 +68,7 @@ export function EditorProviders({
 }
 ```
 
-Every query the editor runs has a key starting with `"@jaggle-ai-hq/editor"`, so it can share the app's query
+Every query the editor runs has a key starting with `"@jaggle-ai/editor"`, so it can share the app's query
 client without clashing with the app's own queries.
 
 ## 4. Render an editor
@@ -80,7 +78,7 @@ A document with content the app keeps itself:
 ```tsx
 import { useState } from "react";
 
-import { LexicalEditor } from "@jaggle-ai-hq/editor";
+import { LexicalEditor } from "@jaggle-ai/editor";
 
 export function NotesField({ initialHtml }: { initialHtml: string }) {
   const [html, setHtml] = useState(initialHtml);

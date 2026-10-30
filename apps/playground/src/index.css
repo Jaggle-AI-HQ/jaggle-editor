@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 /* What an app adds for the editor: its styles, and its classes for Tailwind. */
-@import "@jaggle-ai-hq/editor/styles.css";
-@source "../../../node_modules/@jaggle-ai-hq/editor/dist";
+@import "@jaggle-ai/editor/styles.css";
+@source "../../../node_modules/@jaggle-ai/editor/dist";
 
 @custom-variant dark (&:is(.dark *));
 

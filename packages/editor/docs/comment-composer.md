@@ -4,7 +4,7 @@
 formatting, lists, links, code, tables, `@` mentions, emoji, and one attachment (an image or a file).
 
 ```tsx
-import { LexicalEditor, commentBody, toCommentPayload } from "@jaggle-ai-hq/editor";
+import { LexicalEditor, commentBody, toCommentPayload } from "@jaggle-ai/editor";
 
 function TaskCommentBox({ taskId, projectId }: { taskId: string; projectId: string }) {
   const createComment = useCreateTaskComment(taskId);
@@ -95,7 +95,7 @@ attachment again.
 `mentionDraft(user)` is a starting state that mentions someone, for "Reply" buttons:
 
 ```tsx
-import { mentionDraft } from "@jaggle-ai-hq/editor";
+import { mentionDraft } from "@jaggle-ai/editor";
 
 <LexicalEditor
   key={replyTo?.id ?? "new"} // a new composer for each reply target

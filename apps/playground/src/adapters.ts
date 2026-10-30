@@ -6,7 +6,7 @@ import type {
   EditorUser,
   EditorVersion,
   StoredDocument,
-} from "@jaggle-ai-hq/editor";
+} from "@jaggle-ai/editor";
 import { toast } from "sonner";
 
 /**
@@ -61,7 +61,7 @@ const readStates = new Map<string, string>();
 
 const AI_REPLY = `## A short summary
 
-The editor now lives in **@jaggle-ai-hq/editor**, so both apps share it:
+The editor now lives in **@jaggle-ai/editor**, so both apps share it:
 
 - Jaggle AI keeps its documents, comments and versions.
 - Jaggle Office can add rich text where it has plain text today.

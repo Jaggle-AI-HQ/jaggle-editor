@@ -10,8 +10,8 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @jaggle-ai-hq/editor",
-    "dev": "npm run dev -w @jaggle-ai-hq/editor",
+    "build": "npm run build -w @jaggle-ai/editor",
+    "dev": "npm run dev -w @jaggle-ai/editor",
     "playground": "npm run dev -w playground",
     "collab-server": "npm run collab-server -w playground",
     "typecheck": "npm run typecheck --workspaces --if-present",

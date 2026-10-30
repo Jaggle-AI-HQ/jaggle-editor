@@ -5,7 +5,7 @@ import {
   EditorProvider,
   LexicalEditor,
   type StoredDocument,
-} from "@jaggle-ai-hq/editor";
+} from "@jaggle-ai/editor";
 import { Toaster } from "sonner";
 
 import { createAdapters, PEOPLE } from "./adapters";
@@ -62,7 +62,7 @@ export function App() {
     <EditorProvider adapters={adapters}>
       <div className="flex min-h-screen flex-col">
         <header className="flex flex-wrap items-center gap-2 border-b px-4 py-2">
-          <strong className="me-2">@jaggle-ai-hq/editor</strong>
+          <strong className="me-2">@jaggle-ai/editor</strong>
           <nav className="flex gap-1" aria-label="Examples">
             {TABS.map((name) => (
               <button

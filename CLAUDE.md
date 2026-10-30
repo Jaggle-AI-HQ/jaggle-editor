@@ -1,6 +1,6 @@
 # jaggle-editor
 
-npm workspaces: `packages/editor` (`@jaggle-ai-hq/editor`, tsup, ESM only) and `apps/playground` (Vite 8, Tailwind 4).
+npm workspaces: `packages/editor` (`@jaggle-ai/editor`, tsup, ESM only) and `apps/playground` (Vite 8, Tailwind 4).
 
 - **Run `npm run check` before finishing.** It builds, lints, typechecks and tests. The dist tests read `packages/editor/dist`, so build first.
 - **Backend access goes through an adapter.** Add new backend needs to `src/adapters/types.ts` (with a "without it" behaviour); never import an app's services. Every editor query key starts with `EDITOR_QUERY_KEY`.

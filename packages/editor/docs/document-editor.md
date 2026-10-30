@@ -30,7 +30,7 @@ Without a `source`, the editor edits content the app owns. The app passes the st
 changes itself:
 
 ```tsx
-import { LexicalEditor, type DocumentChangeHandler } from "@jaggle-ai-hq/editor";
+import { LexicalEditor, type DocumentChangeHandler } from "@jaggle-ai/editor";
 
 function ReportBody({ report }: { report: Report }) {
   const save = useSaveReport(report.id);
@@ -195,7 +195,7 @@ Without a header, the editor's actions sit in the editor's top corner.
 Slot content renders inside the editor, so it can call `useDocumentUi()` to drive the editor:
 
 ```tsx
-import { useDocumentUi } from "@jaggle-ai-hq/editor";
+import { useDocumentUi } from "@jaggle-ai/editor";
 
 function ExportPdfButton() {
   const ui = useDocumentUi();
@@ -222,7 +222,7 @@ function ExportPdfButton() {
 ```tsx
 import { useRef } from "react";
 
-import { LexicalEditor, type DocumentHandle } from "@jaggle-ai-hq/editor";
+import { LexicalEditor, type DocumentHandle } from "@jaggle-ai/editor";
 
 function GeneratedDocument({ source }: { source: DocumentSource }) {
   const handle = useRef<DocumentHandle | null>(null);
@@ -286,7 +286,7 @@ Two exports help pages that show a document without opening the editor:
 - `DocumentExportDialog`: a dialog with the same formats as the Export menu, for saved HTML.
 
   ```tsx
-  import { DocumentExportDialog } from "@jaggle-ai-hq/editor";
+  import { DocumentExportDialog } from "@jaggle-ai/editor";
 
   <DocumentExportDialog
     open={open}
@@ -308,7 +308,7 @@ Two exports help pages that show a document without opening the editor:
 load. Use it in your own views of saved content:
 
 ```tsx
-import { IncompleteDocumentNotice } from "@jaggle-ai-hq/editor";
+import { IncompleteDocumentNotice } from "@jaggle-ai/editor";
 
 <IncompleteDocumentNotice
   purpose="view" // "edit" | "view" | "export"

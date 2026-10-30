@@ -5,7 +5,7 @@ The editor never calls a backend itself. Everything it needs from the app comes 
 missing is hidden, or (for files) kept in the page only.
 
 ```tsx
-import { EditorProvider, type EditorAdapters } from "@jaggle-ai-hq/editor";
+import { EditorProvider, type EditorAdapters } from "@jaggle-ai/editor";
 
 const adapters = useMemo<EditorAdapters>(
   () => ({
@@ -34,7 +34,7 @@ const adapters = useMemo<EditorAdapters>(
   import), the editor shows the error's `message`.
 - **Use the `signal`** where one is passed. The editor aborts requests it no longer needs (a closed dialog, a
   cancelled upload, a superseded search).
-- Every TypeScript type below is exported from `@jaggle-ai-hq/editor`.
+- Every TypeScript type below is exported from `@jaggle-ai/editor`.
 - The [playground's adapters](../../../apps/playground/src/adapters.ts) implement all of them in memory. The
   [package README](../README.md#from-jaggle-app-fes-services-to-adapters) maps each one to jaggle-app-fe's services.
 

@@ -1,8 +1,8 @@
 {
-  "name": "@jaggle-ai-hq/editor",
+  "name": "@jaggle-ai/editor",
   "version": "0.1.1",
   "description": "Jaggle's Lexical rich-text editor for React: document and comment editors with live collaboration, comment threads, version history, AI writing and import/export",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -25,10 +25,12 @@
   },
   "files": [
     "dist",
+    "LICENSE",
     "LICENSE-shadcn-editor"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "repository": {
     "type": "git",

@@ -2,17 +2,16 @@
 
 ## Installing
 
-### `401 Unauthorized` or `404 Not Found` from `npm.pkg.github.com`
+### `404 Not Found` for `@jaggle-ai/editor`
 
-- The token needs the `read:packages` scope, and an account with access to the `Jaggle-AI-HQ` organisation.
-- The `@jaggle-ai-hq` scope must point at GitHub Packages (`.npmrc` or `.yarnrc.yml`, see the
-  [README](../README.md#install)). Without it, the package manager looks on npmjs.org and returns 404.
-- In CI and Docker builds, pass the token as a secret (`GITHUB_PACKAGES_TOKEN`), not baked into an image layer.
+The package is on npmjs.org. A `.npmrc` or `.yarnrc.yml` that points the `@jaggle-ai` scope at another registry
+sends the request there. Remove that scope setting. (Version 0.1.1 was `@jaggle-ai-hq/editor` on GitHub Packages; it
+isn't on npm.)
 
 ### Yarn or pnpm refuses a new version
 
-Both can hold back releases younger than a minimum age. Allow the scope: `npmPreapprovedPackages: ["@jaggle-ai-hq/*"]`
-in `.yarnrc.yml`, or `minimumReleaseAgeExclude: ["@jaggle-ai-hq/*"]` in `pnpm-workspace.yaml`.
+Both can hold back releases younger than a minimum age. Allow the scope: `npmPreapprovedPackages: ["@jaggle-ai/*"]`
+in `.yarnrc.yml`, or `minimumReleaseAgeExclude: ["@jaggle-ai/*"]` in `pnpm-workspace.yaml`.
 
 ### Lexical or Yjs is loaded twice
 
@@ -30,7 +29,7 @@ Lexical errors about nodes or editors that don't exist.
 
 - Tailwind isn't generating the editor's classes. Add `@source` for the package's `dist` folder, with the right
   relative path from your CSS file ([Styling](styling.md#setup)).
-- `@import "@jaggle-ai-hq/editor/styles.css"` is missing.
+- `@import "@jaggle-ai/editor/styles.css"` is missing.
 - The shadcn/ui variables (`--popover`, `--border`…) aren't defined or aren't mapped in `@theme`.
 - Menus and dialogs don't animate: install and import `tw-animate-css`.
 

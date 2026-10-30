@@ -1,4 +1,4 @@
-# @jaggle-ai-hq/editor guides
+# @jaggle-ai/editor guides
 
 The [package README](../README.md) covers installing, styles and the contracts shared between apps. These guides
 explain how to use the editor in an app.

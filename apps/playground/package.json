@@ -2,7 +2,7 @@
   "name": "playground",
   "private": true,
   "type": "module",
-  "description": "Tries @jaggle-ai-hq/editor the way an app uses it: Vite, Tailwind 4 and in-memory adapters",
+  "description": "Tries @jaggle-ai/editor the way an app uses it: Vite, Tailwind 4 and in-memory adapters",
   "scripts": {
     "dev": "vite --port 5190 --strictPort",
     "build": "vite build",
@@ -11,7 +11,7 @@
     "collab-server": "HOST=localhost PORT=1234 y-websocket"
   },
   "dependencies": {
-    "@jaggle-ai-hq/editor": "*",
+    "@jaggle-ai/editor": "*",
     "@lexical/clipboard": "0.51.0",
     "@lexical/code": "0.51.0",
     "@lexical/code-shiki": "0.51.0",

@@ -11,13 +11,13 @@ In the app's main stylesheet, after `@import "tailwindcss"`:
 ```css
 @import "tailwindcss";
 @import "tw-animate-css"; /* the editor's menus and dialogs animate with it */
-@import "@jaggle-ai-hq/editor/styles.css";
-@source "../node_modules/@jaggle-ai-hq/editor/dist";
+@import "@jaggle-ai/editor/styles.css";
+@source "../node_modules/@jaggle-ai/editor/dist";
 
 @custom-variant dark (&:is(.dark *));
 ```
 
-- **`@import "@jaggle-ai-hq/editor/styles.css"`** adds the CSS that utility classes can't express. That covers the
+- **`@import "@jaggle-ai/editor/styles.css"`** adds the CSS that utility classes can't express. That covers the
   block handle menu, placeholders, comment highlights, find-and-replace matches, code blocks, tables, cards,
   toggles, pull quotes, and KaTeX for equations. It's plain CSS, so import it from CSS, never from TypeScript.
 - **`@source`** tells Tailwind to scan the package's built files for class names. Without it, the editor renders
@@ -25,9 +25,9 @@ In the app's main stylesheet, after `@import "tailwindcss"`:
 
   | Layout | `@source` |
   |---|---|
-  | CSS in `src/`, `node_modules` beside `src/` | `"../node_modules/@jaggle-ai-hq/editor/dist"` |
-  | CSS in `src/app/` (Next.js App Router) | `"../../node_modules/@jaggle-ai-hq/editor/dist"` |
-  | A workspace app with `node_modules` hoisted to the repo root | e.g. `"../../../node_modules/@jaggle-ai-hq/editor/dist"` |
+  | CSS in `src/`, `node_modules` beside `src/` | `"../node_modules/@jaggle-ai/editor/dist"` |
+  | CSS in `src/app/` (Next.js App Router) | `"../../node_modules/@jaggle-ai/editor/dist"` |
+  | A workspace app with `node_modules` hoisted to the repo root | e.g. `"../../../node_modules/@jaggle-ai/editor/dist"` |
 
 - **`tw-animate-css`** provides the `animate-in` and `fade-in` classes that menus and dialogs use. Install it in the
   app (`npm install tw-animate-css`).

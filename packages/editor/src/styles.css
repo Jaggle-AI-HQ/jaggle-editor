@@ -1,9 +1,9 @@
 /*
- * @jaggle-ai-hq/editor styles. Import once from the app's Tailwind stylesheet,
+ * @jaggle-ai/editor styles. Import once from the app's Tailwind stylesheet,
  * after `@import "tailwindcss"`, and point Tailwind at the package's classes:
  *
- *   @import "@jaggle-ai-hq/editor/styles.css";
- *   @source "../node_modules/@jaggle-ai-hq/editor/dist";
+ *   @import "@jaggle-ai/editor/styles.css";
+ *   @source "../node_modules/@jaggle-ai/editor/dist";
  *
  * The editor uses the shadcn/ui theme variables (--background, --primary,
  * --muted-foreground, --radius …), a `.dark` class for dark mode, and

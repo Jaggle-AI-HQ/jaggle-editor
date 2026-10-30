@@ -1,5 +1,5 @@
 /**
- * @jaggle-ai-hq/editor: Jaggle's Lexical editor. Wrap the app (or the part
+ * @jaggle-ai/editor: Jaggle's Lexical editor. Wrap the app (or the part
  * with editors) in `EditorProvider` with its adapters, import the styles once
  * (see `styles.css`), then render `LexicalEditor`.
  */

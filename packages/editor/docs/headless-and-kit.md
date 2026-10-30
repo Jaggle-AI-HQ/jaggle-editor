@@ -4,8 +4,8 @@ Two extra entry points cover work outside `LexicalEditor`:
 
 | Import | For |
 |---|---|
-| `@jaggle-ai-hq/editor/headless` | Converting and exporting saved content without showing an editor |
-| `@jaggle-ai-hq/editor/kit` | Building a small editor of your own that looks and behaves like this one |
+| `@jaggle-ai/editor/headless` | Converting and exporting saved content without showing an editor |
+| `@jaggle-ai/editor/kit` | Building a small editor of your own that looks and behaves like this one |
 
 Both are separate bundles, so a page that only imports the main entry doesn't load them.
 
@@ -14,7 +14,7 @@ Both are separate bundles, so a page that only imports the main entry doesn't lo
 ### `documentHtmlFromMarkdown`
 
 ```ts
-import { documentHtmlFromMarkdown } from "@jaggle-ai-hq/editor/headless";
+import { documentHtmlFromMarkdown } from "@jaggle-ai/editor/headless";
 
 const html: string = documentHtmlFromMarkdown(markdown);
 ```
@@ -25,7 +25,7 @@ document's content (`StoredDocument.html` with no `yjsState`), and the editor op
 The main entry has a lazy version, which loads the converter on first use:
 
 ```ts
-import { markdownToDocumentHtml } from "@jaggle-ai-hq/editor";
+import { markdownToDocumentHtml } from "@jaggle-ai/editor";
 
 const html = await markdownToDocumentHtml(markdown);
 ```
@@ -33,7 +33,7 @@ const html = await markdownToDocumentHtml(markdown);
 ### `exportDocumentHtml`
 
 ```ts
-import { exportDocumentHtml } from "@jaggle-ai-hq/editor/headless";
+import { exportDocumentHtml } from "@jaggle-ai/editor/headless";
 
 await exportDocumentHtml(saved.html, "pdf", doc.title, { files, exporter });
 ```
@@ -55,7 +55,7 @@ entry (see [Document editor](document-editor.md#import-and-export)).
 The adapters from `useEditorAdapters()` fit the `services` argument directly:
 
 ```tsx
-import { useEditorAdapters } from "@jaggle-ai-hq/editor";
+import { useEditorAdapters } from "@jaggle-ai/editor";
 
 function DownloadButton({ html, title }: { html: string; title: string }) {
   const { files, exporter } = useEditorAdapters();
@@ -68,7 +68,7 @@ function DownloadButton({ html, title }: { html: string; title: string }) {
 ### `createHeadlessDocumentEditor`
 
 ```ts
-import { createHeadlessDocumentEditor } from "@jaggle-ai-hq/editor/headless";
+import { createHeadlessDocumentEditor } from "@jaggle-ai/editor/headless";
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
 import { $getRoot, $insertNodes } from "lexical";
 
@@ -121,7 +121,7 @@ import { HistoryExtension } from "@lexical/history";
 import { $getSelection, $isRangeSelection, configExtension, defineExtension, FORMAT_TEXT_COMMAND } from "lexical";
 import { useEffect, useState } from "react";
 
-import { $getActiveTextFormats, EditorErrorBoundary, editorTheme, ToolbarToggle } from "@jaggle-ai-hq/editor/kit";
+import { $getActiveTextFormats, EditorErrorBoundary, editorTheme, ToolbarToggle } from "@jaggle-ai/editor/kit";
 
 const noteExtension = defineExtension({
   name: "sticky-note",

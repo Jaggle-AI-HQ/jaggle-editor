@@ -1,4 +1,4 @@
-# @jaggle-ai-hq/editor
+# @jaggle-ai/editor
 
 Jaggle's rich-text editor, built on [Lexical](https://lexical.dev) 0.51, for React 19 apps. It has two modes:
 
@@ -22,36 +22,18 @@ This README is the reference for installing and for the contracts between apps. 
 
 ## Install
 
-The package is private, on GitHub Packages. Reading it needs a token with `read:packages` (a personal token locally, a CI secret in pipelines and Docker builds).
+The package is public on npm, under the MIT license. Installing it needs no token or registry setup.
 
-**Yarn 4 (jaggle-app-fe)**, in `.yarnrc.yml`:
+A project that holds back new releases needs to allow ours:
+- **Yarn 4** with `npmMinimalAgeGate` (jaggle-app-fe): add `"@jaggle-ai/*"` to `npmPreapprovedPackages` in `.yarnrc.yml`.
+- **pnpm** with `minimumReleaseAge` (Jaggle Office): add `@jaggle-ai/*` to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
 
-```yaml
-npmScopes:
-  jaggle-ai-hq:
-    npmRegistryServer: "https://npm.pkg.github.com"
-    npmAlwaysAuth: true
-    npmAuthToken: "${GITHUB_PACKAGES_TOKEN-}"
-# Releases are newer than the 7-day age gate.
-npmPreapprovedPackages:
-  - "@jaggle-ai-hq/*"
-```
-
-**pnpm / npm (Jaggle Office)**:
-
-- In `.npmrc`:
-
-  ```ini
-  @jaggle-ai-hq:registry=https://npm.pkg.github.com
-  //npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
-  ```
-
-- In `pnpm-workspace.yaml`, add `@jaggle-ai-hq/*` to `minimumReleaseAgeExclude`.
+Version 0.1.1 was published privately as `@jaggle-ai-hq/editor` on GitHub Packages. From 0.2.0 it is `@jaggle-ai/editor` on npm.
 
 **Peer dependencies.** Install these once, in the app, because there must be a single copy of each:
 
 ```bash
-yarn add @jaggle-ai-hq/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
+yarn add @jaggle-ai/editor @tanstack/react-query yjs lexical @lexical/clipboard @lexical/code @lexical/code-shiki @lexical/extension @lexical/history @lexical/html @lexical/link @lexical/list @lexical/mark @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/text @lexical/utils @lexical/yjs
 ```
 
 The version ranges:
@@ -66,8 +48,8 @@ The editor is styled with Tailwind 4 classes and the standard shadcn/ui theme va
 
 ```css
 @import "tw-animate-css"; /* menus and dialogs animate with it */
-@import "@jaggle-ai-hq/editor/styles.css";
-@source "../node_modules/@jaggle-ai-hq/editor/dist"; /* path from this CSS file */
+@import "@jaggle-ai/editor/styles.css";
+@source "../node_modules/@jaggle-ai/editor/dist"; /* path from this CSS file */
 ```
 
 The app must define these shadcn variables: `--background`, `--foreground`, `--card(-foreground)`, `--popover(-foreground)`, `--primary(-foreground)`, `--secondary(-foreground)`, `--muted(-foreground)`, `--accent(-foreground)`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`. They must also be mapped to colours in `@theme`.
@@ -77,7 +59,7 @@ Dark mode follows a `.dark` class on an ancestor (`@custom-variant dark (&:is(.d
 ## Use
 
 ```tsx
-import { EditorProvider, LexicalEditor, type EditorAdapters } from "@jaggle-ai-hq/editor";
+import { EditorProvider, LexicalEditor, type EditorAdapters } from "@jaggle-ai/editor";
 
 function Editors({ children }: { children: React.ReactNode }) {
   const adapters = useMemo<EditorAdapters>(() => ({ currentUser, people, files, documents /* … */ }), [/* … */]);
@@ -149,11 +131,11 @@ Both apps open the same documents, so these must not change:
 
 ## Other entry points
 
-- `@jaggle-ai-hq/editor/headless`:
+- `@jaggle-ai/editor/headless`:
   - `documentHtmlFromMarkdown`, for AI output saved without opening an editor
   - `exportDocumentHtml(html, format, title, { files, exporter })`
   - `createHeadlessDocumentEditor`
-- `@jaggle-ai-hq/editor/kit`: building blocks for a small editor of your own (jaggle-app-fe's sticky notes):
+- `@jaggle-ai/editor/kit`: building blocks for a small editor of your own (jaggle-app-fe's sticky notes):
   - `EditorErrorBoundary`, `ToolbarToggle`, `ToolbarIconButton`
   - `$getActiveTextFormats`
   - the themes and comment payload helpers
@@ -205,7 +187,7 @@ The playground has a few URL parameters:
 
 Run the **Publish Package** workflow (Actions → Publish Package) with a version bump. It does the following:
 - runs the checks
-- publishes to GitHub Packages
+- publishes to npm, publicly (with the repository's `NPM_TOKEN` secret)
 - commits the version
-- tags `@jaggle-ai-hq/editor@x.y.z`
+- tags `@jaggle-ai/editor@x.y.z`
 - creates a GitHub release
