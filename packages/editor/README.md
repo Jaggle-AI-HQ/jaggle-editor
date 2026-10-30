@@ -7,6 +7,19 @@ Jaggle's rich-text editor, built on [Lexical](https://lexical.dev) 0.51, for Rea
 
 It was extracted from jaggle-app-fe (see `CHANGELOG.md`) so that Jaggle AI and Jaggle Office share one editor. Anything that talks to a backend goes through **adapters** the app provides.
 
+## Guides
+
+This README is the reference for installing and for the contracts between apps. The [guides](docs/README.md) explain how to use the editor:
+
+- [Getting started](docs/getting-started.md): from install to a working editor
+- [Document editor](docs/document-editor.md): local content, saved documents, read-only views, the header, `onReady`, comments, versions, import and export
+- [Comment composer](docs/comment-composer.md): posting, editing, replying, attachments
+- [Adapters](docs/adapters.md): every adapter, with an example implementation
+- [Live collaboration](docs/collaboration.md): the y-websocket server, rooms, presence, authorising sockets
+- [Styling](docs/styling.md): Tailwind setup, theme variables, dark mode, layout
+- [Headless and kit](docs/headless-and-kit.md): converting and exporting without an editor, building your own small editor
+- [Troubleshooting](docs/troubleshooting.md)
+
 ## Install
 
 The package is private, on GitHub Packages. Reading it needs a token with `read:packages` (a personal token locally, a CI secret in pipelines and Docker builds).
@@ -94,7 +107,7 @@ function Editors({ children }: { children: React.ReactNode }) {
 The document editor and comment composer load on demand, along with Yjs, the emoji data and KaTeX. A page that only shows `readOnly` HTML doesn't load them.
 
 Every prop is documented on `LexicalEditorProps`. Two props are required where they apply, because there is no route to infer them from:
-- `mentionScope` (or `workspaceId`) for mentions
+- `mentionScope` for mentions. A document editor falls back to `workspaceId`; a comment composer doesn't.
 - `imageScope` for uploads
 
 ## Adapters
