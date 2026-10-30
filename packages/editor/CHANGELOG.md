@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- Fixed: a page that passes `source` inline (a new object each render) made the document editor reload its comment
+  threads and read marker on every render. Against an app whose thread requests re-render the page, that never
+  stopped. The editor now keys them on the document (`entityType`, `entityId`, `documentKey`), as jaggle-app-fe's
+  editor did.
+
 ## 0.2.0
 
 - MIT licensed (it was UNLICENSED), and the repository is public.

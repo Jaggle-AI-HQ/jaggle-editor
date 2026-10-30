@@ -255,19 +255,17 @@ function DocumentWorkspace({
     [runtime, t.you],
   );
   const hasRuntime = runtime !== null;
+  // Keyed on the document, not the `source` object: a page passing it inline
+  // makes a new one each render, which would reload the threads every time.
+  const entityType = source?.entityType;
+  const entityId = source?.entityId;
+  const documentKey = source?.documentKey;
   const threadSync = useMemo<ThreadSync | null>(
     () =>
-      hasRuntime && source && threads
-        ? {
-            identity: {
-              entityType: source.entityType,
-              entityId: source.entityId,
-              documentKey: source.documentKey,
-            },
-            api: threads,
-          }
+      hasRuntime && entityType && entityId && threads
+        ? { identity: { entityType, entityId, documentKey }, api: threads }
         : null,
-    [hasRuntime, source, threads],
+    [documentKey, entityId, entityType, hasRuntime, threads],
   );
   const threadActions = useMemo(
     () => createThreadActions(threadDoc, me, threadSync, toast),

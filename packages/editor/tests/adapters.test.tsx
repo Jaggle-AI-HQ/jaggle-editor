@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, type ReactNode } from "react";
+import { act, type ReactNode, useEffect, useState } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot, type Root } from "react-dom/client";
@@ -13,6 +13,7 @@ import {
   EditorProvider,
   LexicalEditor,
   type StoredDocument,
+  type ThreadsAdapter,
   type VersionsAdapter,
 } from "../src/index";
 
@@ -136,5 +137,47 @@ describe("adapters", () => {
     const last = saves[saves.length - 1];
     expect(last.html).toContain("Written in the");
     expect(last.yjsState.length).toBeGreaterThan(0);
+  });
+
+  it("loads comment threads once while the page re-renders it", async () => {
+    const { documents } = memoryDocuments();
+    const list = vi.fn<ThreadsAdapter["list"]>(async () => []);
+    const getReadState = vi.fn<NonNullable<ThreadsAdapter["getReadState"]>>(async () => null);
+    const nothing = async () => undefined;
+    const threads: ThreadsAdapter = {
+      list,
+      create: nothing,
+      addComment: nothing,
+      updateComment: nothing,
+      deleteComment: nothing,
+      deleteThread: nothing,
+      setResolved: nothing,
+      addReaction: nothing,
+      removeReaction: nothing,
+      getReadState,
+      saveReadState: nothing,
+    };
+    const renders = { count: 0 };
+    // A page that keeps rendering the editor with a new `source` object, as an
+    // inline prop does, until well after the threads first load.
+    function Page() {
+      const [tick, setTick] = useState(0);
+      useEffect(() => {
+        renders.count = tick;
+        if (tick >= 60) return;
+        const timer = setTimeout(() => setTick(tick + 1), 50);
+        return () => clearTimeout(timer);
+      }, [tick]);
+      return <LexicalEditor mode="document" source={{ ...source }} showComments />;
+    }
+    const container = await mount({ currentUser: me, documents, threads }, <Page />);
+    await editorLoaded(container);
+    await vi.waitFor(() => expect(list).toHaveBeenCalled(), { timeout: 5000 });
+    const loadedAt = renders.count;
+    await vi.waitFor(() => expect(renders.count).toBeGreaterThanOrEqual(loadedAt + 5), {
+      timeout: 5000,
+    });
+    expect(list).toHaveBeenCalledTimes(1);
+    expect(getReadState.mock.calls.length).toBeLessThanOrEqual(1);
   });
 });
