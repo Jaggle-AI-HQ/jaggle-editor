@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.1
 
 First version. The source is jaggle-app-fe's `src/components/lexical/core`, taken at `origin/dev` `ac0f887caddaba50a02b17afa94d7c3ebca3beed` (2026-10-30). Editor changes made in jaggle-app-fe after that commit need porting here until jaggle-app-fe uses this package.
 
