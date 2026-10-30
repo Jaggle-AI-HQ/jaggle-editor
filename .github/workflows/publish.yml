@@ -1,0 +1,91 @@
+name: Publish Package
+
+# Publishes @jaggle-ai-hq/editor to GitHub Packages (private, like this repo).
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      preid:
+        description: Pre-release identifier (only used when bump is "prerelease")
+        required: false
+        type: string
+        default: beta
+
+concurrency:
+  group: publish-editor
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish @jaggle-ai-hq/editor
+    runs-on: [self-hosted, jaggle-dev]
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://npm.pkg.github.com
+          scope: "@jaggle-ai-hq"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bump version
+        id: version
+        run: |
+          if [ "${{ github.event.inputs.bump }}" = "prerelease" ]; then
+            npm version prerelease --preid=${{ github.event.inputs.preid }} --no-git-tag-version
+          else
+            npm version ${{ github.event.inputs.bump }} --no-git-tag-version
+          fi
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+        working-directory: packages/editor
+
+      - name: Build, lint, typecheck, test
+        run: npm run check
+
+      - name: Publish
+        run: |
+          if [ "${{ github.event.inputs.bump }}" = "prerelease" ]; then
+            npm publish --tag ${{ github.event.inputs.preid }}
+          else
+            npm publish
+          fi
+        working-directory: packages/editor
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/editor/package.json package-lock.json
+          git commit -m "release: @jaggle-ai-hq/editor@${{ steps.version.outputs.new_version }}"
+          TAG="@jaggle-ai-hq/editor@${{ steps.version.outputs.new_version }}"
+          git tag "$TAG"
+          git push origin HEAD "$TAG"
+
+      - name: Create GitHub Release
+        run: |
+          TAG="@jaggle-ai-hq/editor@${{ steps.version.outputs.new_version }}"
+          if [ "${{ github.event.inputs.bump }}" = "prerelease" ]; then
+            gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}

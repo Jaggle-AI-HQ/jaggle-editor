@@ -1,0 +1,927 @@
+{
+  "documents": {
+    "marks": "<p class=\"relative m-0 mb-2 last:mb-0\"><strong class=\"font-bold\">bold</strong> <em class=\"italic\">italic</em> <u class=\"underline\">underline</u> <s class=\"line-through\">strike</s> <code spellcheck=\"false\" style=\"white-space: pre-wrap;\"><span class=\"rounded bg-muted px-1.5 py-0.5 font-mono text-sm\">code</span></code> <strong class=\"font-bold\"><em class=\"italic\"><u class=\"underline\"><s class=\"line-through\">all</s></u></em></strong></p>",
+    "colours": "<p class=\"relative m-0 mb-2 last:mb-0\"><span style=\"color: #e03e3e\">red</span> <span style=\"background-color: #fbf3db\">yellow bg</span> <span style=\"color: #0b6e99; background-color: #ebeced\"><strong class=\"font-bold\">both</strong></span></p>",
+    "block_colours": "<p class=\"relative m-0 mb-2 last:mb-0\"><span style=\"color: #6940a5; background-color: #ddedea\">whole block <strong class=\"font-bold\">bold</strong></span></p>",
+    "link": "<p class=\"relative m-0 mb-2 last:mb-0\">see <a href=\"https://example.com/a?b=1&amp;c=2\" class=\"cursor-pointer text-primary underline underline-offset-2 hover:text-primary/80\"><strong class=\"font-bold\">docs</strong></a></p>",
+    "hard_break": "<p class=\"relative m-0 mb-2 last:mb-0\">line one<br>line two</p>",
+    "alignment": "<p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\">centred</p><p style=\"text-align: right\" class=\"relative m-0 mb-2 last:mb-0\">right</p><h2 style=\"text-align: justify\" class=\"relative mt-6 mb-3 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0\">justified</h2>",
+    "headings": "<h1 class=\"relative mt-6 mb-4 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance first:mt-0 last:mb-0\">H1</h1><h2 class=\"relative mt-6 mb-3 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0\">H2</h2><h3 class=\"relative mt-4 mb-2 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 last:mb-0\">H3</h3><h4 class=\"relative mt-4 mb-2 scroll-m-20 text-xl font-semibold tracking-tight first:mt-0 last:mb-0\">H4</h4><h5 class=\"relative mt-3 mb-2 scroll-m-20 text-lg font-semibold tracking-tight first:mt-0 last:mb-0\">H5</h5><h6 class=\"relative mt-3 mb-2 scroll-m-20 text-base font-semibold tracking-tight first:mt-0 last:mb-0\">H6</h6>",
+    "bullet_list": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">one<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-[circle]\"><li class=\"relative\">nested</li></ul></li><li class=\"relative\"><strong class=\"font-bold\">two</strong></li></ul>",
+    "numbered_list": "<ol start=\"3\" class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">first</li><li class=\"relative\">second<ol class=\"m-0 mb-2 ps-6 last:mb-0 list-[upper-alpha]\"><li class=\"relative\">nested</li></ol></li></ol>",
+    "check_list": "<ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">done</li><li aria-checked=\"false\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-input before:shadow-xs focus:before:ring-2 focus:before:ring-ring/50 dark:before:bg-input/30\">open<ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-[circle]\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">nested done</li></ul></li></ul>",
+    "mixed_nested_list": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">bullet<ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-[circle]\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">check inside bullet</li></ul><ol class=\"m-0 mb-2 ps-6 last:mb-0 list-[upper-alpha]\"><li class=\"relative\">number inside bullet</li></ol></li></ul>",
+    "list_item_with_paragraph_child": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">item<br>child paragraph</li></ul>",
+    "coloured_list_item": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\"><span style=\"color: #e03e3e\">red item</span></li></ul>",
+    "quote": "<blockquote class=\"relative my-4 border-s-2 ps-6 text-muted-foreground italic first:mt-0 last:mb-0\">quoted <strong class=\"font-bold\">bold</strong></blockquote>",
+    "code_block": "<pre data-language=\"javascript\" class=\"lexical-code relative mb-3 block overflow-x-auto rounded-lg border bg-card py-3 pe-4 ps-0 font-mono text-[13px] leading-relaxed [tab-size:2] [white-space:pre]\" spellcheck=\"false\">const a = 1;<br>if (a &lt; 2) {}</pre><pre class=\"lexical-code relative mb-3 block overflow-x-auto rounded-lg border bg-card py-3 pe-4 ps-0 font-mono text-[13px] leading-relaxed [tab-size:2] [white-space:pre]\" spellcheck=\"false\">plain</pre>",
+    "divider": "<p class=\"relative m-0 mb-2 last:mb-0\">above</p><hr><p class=\"relative m-0 mb-2 last:mb-0\">below</p>",
+    "table": "<table class=\"w-max min-w-full table-fixed caption-bottom text-sm\"><colgroup><col style=\"width: 160px\"><col style=\"width: 240px\"></colgroup><tr class=\"border-b transition-colors hover:bg-muted/50\"><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\">H1</th><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\"><strong class=\"font-bold\">H2</strong></th></tr><tr class=\"border-b transition-colors hover:bg-muted/50\"><td colspan=\"2\" style=\"background-color: #fbf3db\" class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\"><span style=\"color: #e03e3e\">spans two</span></td></tr><tr class=\"border-b transition-colors hover:bg-muted/50\"><td class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\"><p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\">centred</p><p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\">second paragraph</p></td><td class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\">plain</td></tr></table>",
+    "image": "<p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\"><img src=\"https://bucket.example/a.png\" alt=\"a.png\" width=\"320\" data-caption=\"A caption\"></p>",
+    "image_reference": "<p style=\"text-align: left\" class=\"relative m-0 mb-2 last:mb-0\"><img src=\"jaggle-file://attachment/33333333-3333-4333-8333-333333333333\" data-attachment-id=\"33333333-3333-4333-8333-333333333333\" alt=\"ref.png\"></p>",
+    "video": "<video data-lexical-video=\"https://bucket.example/v.mp4\" src=\"https://bucket.example/v.mp4\" data-name=\"v.mp4\" data-align=\"right\" width=\"480\" controls=\"\"></video>",
+    "audio": "<audio data-lexical-audio=\"https://bucket.example/a.mp3\" src=\"https://bucket.example/a.mp3\" data-name=\"a.mp3\" controls=\"\"></audio>",
+    "file": "<a data-lexical-file=\"https://bucket.example/report.pdf\" href=\"https://bucket.example/report.pdf\" data-name=\"report.pdf\" data-caption=\"Q3\">report.pdf</a>",
+    "toggle_list": "<div data-toggle=\"\" data-variant=\"list\" data-level=\"0\" data-open=\"true\"><div data-toggle-title=\"\">toggle title</div><div data-toggle-content=\"\"><p class=\"relative m-0 mb-2 last:mb-0\">hidden content</p></div></div>",
+    "toggle_heading": "<div data-toggle=\"\" data-variant=\"heading\" data-level=\"2\" data-open=\"true\"><div data-toggle-title=\"\">toggle heading</div><div data-toggle-content=\"\"><p class=\"relative m-0 mb-2 last:mb-0\">under it</p></div></div>",
+    "indented_children": "<p class=\"relative m-0 mb-2 last:mb-0\">parent</p><p style=\"padding-inline-start: 40px\" class=\"relative m-0 mb-2 last:mb-0\" data-lexical-indent=\"1\">child</p><p style=\"padding-inline-start: 80px\" class=\"relative m-0 mb-2 last:mb-0\" data-lexical-indent=\"2\">grandchild</p><ul style=\"padding-inline-start: 40px\" class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">list under paragraph</li></ul>",
+    "thread_anchors": "<p class=\"relative m-0 mb-2 last:mb-0\">before <span data-thread-ids=\"11111111-1111-4111-8111-111111111111\">anchored</span> <span data-thread-ids=\"11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222\"><strong class=\"font-bold\">two threads</strong></span></p>",
+    "lifted_out_of_list": "<ol class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">one</li></ol><table class=\"w-max min-w-full table-fixed caption-bottom text-sm\"><tr class=\"border-b transition-colors hover:bg-muted/50\"><td class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\">cell</td></tr></table><p style=\"padding-inline-start: 40px\" class=\"relative m-0 mb-2 last:mb-0\" data-lexical-indent=\"1\">after table</p><ol start=\"2\" class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">two</li></ol>",
+    "empty_paragraph": "<p class=\"relative m-0 mb-2 last:mb-0\">a</p><p class=\"relative m-0 mb-2 last:mb-0\"><br></p><p class=\"relative m-0 mb-2 last:mb-0\">b</p>",
+    "escaping": "<p class=\"relative m-0 mb-2 last:mb-0\">&lt;script&gt;alert(1)&lt;/script&gt; &amp; \"quotes\"</p>",
+    "markdown": "<h1 class=\"relative mt-6 mb-4 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance first:mt-0 last:mb-0\">Title</h1><p class=\"relative m-0 mb-2 last:mb-0\">Some <strong class=\"font-bold\">bold</strong>, <em class=\"italic\">italic</em>, <s class=\"line-through\">strike</s>, <code spellcheck=\"false\" style=\"white-space: pre-wrap;\"><span class=\"rounded bg-muted px-1.5 py-0.5 font-mono text-sm\">code</span></code> and a <a href=\"https://example.com\" class=\"cursor-pointer text-primary underline underline-offset-2 hover:text-primary/80\">link</a>.</p><blockquote class=\"relative my-4 border-s-2 ps-6 text-muted-foreground italic first:mt-0 last:mb-0\"><p class=\"relative m-0 mb-2 last:mb-0\">quote</p></blockquote><ol class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">one</li><li class=\"relative\">two</li></ol><ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">done</li><li aria-checked=\"false\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-input before:shadow-xs focus:before:ring-2 focus:before:ring-ring/50 dark:before:bg-input/30\">open</li></ul><pre data-language=\"js\" class=\"lexical-code relative mb-3 block overflow-x-auto rounded-lg border bg-card py-3 pe-4 ps-0 font-mono text-[13px] leading-relaxed [tab-size:2] [white-space:pre]\" spellcheck=\"false\">let a = 1;<br>let b = 2;</pre><hr><p style=\"text-align: left\" class=\"relative m-0 mb-2 last:mb-0\"><img src=\"https://bucket.example/i.png\" alt=\"alt\"></p>",
+    "plain_text_description": "<p class=\"relative m-0 mb-2 last:mb-0\">First line</p><p class=\"relative m-0 mb-2 last:mb-0\">Second &amp; &lt;third&gt;</p><p class=\"relative m-0 mb-2 last:mb-0\"><br></p><p class=\"relative m-0 mb-2 last:mb-0\">Last</p>",
+    "markdown_description": "<h2 class=\"relative mt-6 mb-3 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0\">Plan</h2><p class=\"relative m-0 mb-2 last:mb-0\">line a<br>line b</p><ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">done</li></ul>",
+    "blocknote_html_description": "<h3 class=\"relative mt-4 mb-2 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 last:mb-0\"><span style=\"color: #0b6e99\"><strong class=\"font-bold\">Scope</strong></span></h3><ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">Done <span style=\"background-color: #fbf3db\">now</span></li></ul>",
+    "blocknote_export_marks": "<p class=\"relative m-0 mb-2 last:mb-0\"><strong class=\"font-bold\">bold</strong><em class=\"italic\"> it</em><u class=\"underline\"> u</u><s class=\"line-through\"> s</s><code spellcheck=\"false\" style=\"white-space: pre-wrap;\"><span class=\"rounded bg-muted px-1.5 py-0.5 font-mono text-sm\"> code</span></code><span style=\"color: #e03e3e\"> red</span><span style=\"background-color: #fbf3db\"> ybg</span> css</p>",
+    "blocknote_export_link": "<p class=\"relative m-0 mb-2 last:mb-0\"><strong class=\"font-bold\"><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://example.com\" class=\"cursor-pointer text-primary underline underline-offset-2 hover:text-primary/80\">link</a></strong></p>",
+    "blocknote_export_block_colours_align": "<p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\"><span style=\"color: #6940a5; background-color: #ddedea\">block</span></p>",
+    "blocknote_export_headings": "<h1 class=\"relative mt-6 mb-4 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance first:mt-0 last:mb-0\">H1</h1><h2 data-level=\"2\" class=\"relative mt-6 mb-3 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0\">H2</h2><h3 data-level=\"3\" class=\"relative mt-4 mb-2 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 last:mb-0\">H3</h3><h4 data-level=\"4\" class=\"relative mt-4 mb-2 scroll-m-20 text-xl font-semibold tracking-tight first:mt-0 last:mb-0\">H4</h4><h5 data-level=\"5\" class=\"relative mt-3 mb-2 scroll-m-20 text-lg font-semibold tracking-tight first:mt-0 last:mb-0\">H5</h5><h6 data-level=\"6\" class=\"relative mt-3 mb-2 scroll-m-20 text-base font-semibold tracking-tight first:mt-0 last:mb-0\">H6</h6>",
+    "blocknote_export_toggle_heading": "<div data-toggle=\"\" data-variant=\"heading\" data-level=\"2\" data-open=\"true\"><div data-toggle-title=\"\">toggle</div><div data-toggle-content=\"\"><p class=\"relative m-0 mb-2 last:mb-0\">inside</p></div></div>",
+    "blocknote_export_lists": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">bullet<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-[circle]\"><li class=\"relative\">nested</li></ul></li></ul><p style=\"padding-inline-start: 40px\" class=\"relative m-0 mb-2 last:mb-0\" data-lexical-indent=\"1\">child para</p><ol start=\"3\" class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">third</li></ol><ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">done</li><li aria-checked=\"false\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-input before:shadow-xs focus:before:ring-2 focus:before:ring-ring/50 dark:before:bg-input/30\">open</li></ul><ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">toggle item<br>hidden</li></ul>",
+    "blocknote_export_quote": "<blockquote class=\"relative my-4 border-s-2 ps-6 text-muted-foreground italic first:mt-0 last:mb-0\">quoted</blockquote>",
+    "blocknote_export_code": "<pre data-language=\"javascript\" class=\"lexical-code relative mb-3 block overflow-x-auto rounded-lg border bg-card py-3 pe-4 ps-0 font-mono text-[13px] leading-relaxed [tab-size:2] [white-space:pre]\" spellcheck=\"false\">let a = 1;<br>let b = 2;</pre>",
+    "blocknote_export_divider": "<p class=\"relative m-0 mb-2 last:mb-0\">a</p><hr><p class=\"relative m-0 mb-2 last:mb-0\">b</p>",
+    "blocknote_export_table": "<table class=\"w-max min-w-full table-fixed caption-bottom text-sm\"><colgroup><col style=\"width: 120px\"><col style=\"width: 200px\"></colgroup><tr class=\"border-b transition-colors hover:bg-muted/50\"><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\">H1</th><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\">H2</th></tr><tr class=\"border-b transition-colors hover:bg-muted/50\"><td style=\"background-color: #fbf3db\" class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\"><p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\"><span style=\"color: #e03e3e\">c1</span></p></td><td class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\">c2</td></tr></table>",
+    "blocknote_export_image": "<p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\"><img src=\"https://bucket.example/a.png\" alt=\"a.png\" width=\"320\" data-caption=\"Cap\"></p>",
+    "blocknote_export_video": "<video data-lexical-video=\"https://bucket.example/v.mp4\" src=\"https://bucket.example/v.mp4\" data-name=\"v.mp4\" data-caption=\"Vid\" width=\"480\" controls=\"\"></video>",
+    "blocknote_export_audio": "<audio data-lexical-audio=\"https://bucket.example/a.mp3\" src=\"https://bucket.example/a.mp3\" data-name=\"a.mp3\" data-caption=\"Aud\" controls=\"\"></audio>",
+    "blocknote_export_file": "<a data-lexical-file=\"https://bucket.example/r.pdf\" href=\"https://bucket.example/r.pdf\" data-name=\"r.pdf\" data-caption=\"Doc\">r.pdf</a>"
+  },
+  "comments": {
+    "plate_marks": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 1,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "bold"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 2,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " italic"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 8,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " underline"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 4,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " strike"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 16,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " code"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 128,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " highlight"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 32,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " sub"
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 64,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " sup"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\"><strong class=\"font-bold\">bold</strong><em class=\"italic\"> italic</em><u class=\"underline\"> underline</u><s class=\"line-through\"> strike</s><code spellcheck=\"false\" style=\"white-space: pre-wrap;\"><span class=\"rounded bg-muted px-1.5 py-0.5 font-mono text-sm\"> code</span></code><mark class=\"rounded bg-yellow-200/70 dark:bg-yellow-500/30\"> highlight</mark><sub class=\"align-sub text-xs\"> sub</sub><sup class=\"align-super text-xs\"> sup</sup></p>",
+      "plainText": "bold italic underline strike code highlight sub sup"
+    },
+    "plate_blocks": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "heading",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "tag": "h1",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Heading"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "center",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "centred"
+                  }
+                ]
+              },
+              {
+                "type": "quote",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "quote"
+                  }
+                ]
+              },
+              {
+                "type": "code",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "language": "go",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "a := 1"
+                  },
+                  {
+                    "type": "linebreak",
+                    "version": 1
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "b := 2"
+                  }
+                ]
+              },
+              {
+                "type": "horizontalrule",
+                "version": 1
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<h1 class=\"relative mt-6 mb-4 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance first:mt-0 last:mb-0\">Heading</h1><p style=\"text-align: center\" class=\"relative m-0 mb-2 last:mb-0\">centred</p><blockquote class=\"relative my-4 border-s-2 ps-6 text-muted-foreground italic first:mt-0 last:mb-0\">quote</blockquote><pre data-language=\"go\" class=\"lexical-code relative mb-3 block overflow-x-auto rounded-lg border bg-card py-3 pe-4 ps-0 font-mono text-[13px] leading-relaxed [tab-size:2] [white-space:pre]\" spellcheck=\"false\">a := 1<br>b := 2</pre><hr>",
+      "plainText": "Heading\ncentred\nquote\na := 1\nb := 2"
+    },
+    "plate_lists": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "list",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "listType": "bullet",
+                "start": 1,
+                "tag": "ul",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "value": 1,
+                    "children": [
+                      {
+                        "type": "text",
+                        "version": 1,
+                        "detail": 0,
+                        "format": 0,
+                        "mode": "normal",
+                        "style": "",
+                        "text": "bullet"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "listitem",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "value": 2,
+                    "children": [
+                      {
+                        "type": "list",
+                        "version": 1,
+                        "direction": null,
+                        "format": "",
+                        "indent": 0,
+                        "listType": "bullet",
+                        "start": 1,
+                        "tag": "ul",
+                        "children": [
+                          {
+                            "type": "listitem",
+                            "version": 1,
+                            "direction": null,
+                            "format": "",
+                            "indent": 0,
+                            "value": 1,
+                            "children": [
+                              {
+                                "type": "text",
+                                "version": 1,
+                                "detail": 0,
+                                "format": 0,
+                                "mode": "normal",
+                                "style": "",
+                                "text": "nested"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "listType": "number",
+                "start": 1,
+                "tag": "ol",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "value": 1,
+                    "children": [
+                      {
+                        "type": "text",
+                        "version": 1,
+                        "detail": 0,
+                        "format": 0,
+                        "mode": "normal",
+                        "style": "",
+                        "text": "number"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "listType": "check",
+                "start": 1,
+                "tag": "ul",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "value": 1,
+                    "children": [
+                      {
+                        "type": "text",
+                        "version": 1,
+                        "detail": 0,
+                        "format": 0,
+                        "mode": "normal",
+                        "style": "",
+                        "text": "todo"
+                      }
+                    ],
+                    "checked": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<ul class=\"m-0 mb-2 ps-6 last:mb-0 list-disc\"><li class=\"relative\">bullet</li><li class=\"relative\"><ul class=\"m-0 mb-2 ps-6 last:mb-0 list-[circle]\"><li class=\"relative\">nested</li></ul></li></ul><ol class=\"m-0 mb-2 ps-6 last:mb-0 list-decimal\"><li class=\"relative\">number</li></ol><ul __lexicalListType=\"check\" class=\"m-0 mb-2 ps-6 last:mb-0 !ps-1 list-disc\"><li aria-checked=\"true\" role=\"checkbox\" tabindex=\"-1\" class=\"relative list-none ps-[24px] text-muted-foreground outline-none before:absolute before:start-0 before:top-[3px] before:size-[16px] before:cursor-pointer before:rounded-[4px] before:border before:border-foreground before:bg-foreground before:shadow-xs after:absolute after:start-[5px] after:top-[6px] after:h-[9px] after:w-[5px] after:rotate-45 after:cursor-pointer after:border-r-2 after:border-b-2 after:border-background focus:before:ring-2 focus:before:ring-ring/50\">todo</li></ul>",
+      "plainText": "bullet\nnested\nnumber\ntodo"
+    },
+    "plate_link_and_mention": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "see "
+                  },
+                  {
+                    "type": "link",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "url": "https://example.com",
+                    "rel": null,
+                    "target": null,
+                    "title": null,
+                    "children": [
+                      {
+                        "type": "text",
+                        "version": 1,
+                        "detail": 0,
+                        "format": 0,
+                        "mode": "normal",
+                        "style": "",
+                        "text": "link"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " "
+                  },
+                  {
+                    "type": "mention",
+                    "version": 1,
+                    "entityType": "user",
+                    "entityId": "user-1",
+                    "title": "Dorji",
+                    "href": ""
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\">see <a href=\"https://example.com\" class=\"cursor-pointer text-primary underline underline-offset-2 hover:text-primary/80\">link</a> <span data-lexical-mention=\"\" data-entity-type=\"user\" data-entity-id=\"user-1\" data-title=\"Dorji\">@Dorji</span></p>",
+      "plainText": "see link @Dorji"
+    },
+    "plate_table": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "table",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "children": [
+                  {
+                    "type": "tablerow",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "children": [
+                      {
+                        "type": "tablecell",
+                        "version": 1,
+                        "direction": null,
+                        "format": "",
+                        "indent": 0,
+                        "headerState": 1,
+                        "colSpan": 1,
+                        "rowSpan": 1,
+                        "backgroundColor": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "version": 1,
+                            "direction": null,
+                            "format": "",
+                            "indent": 0,
+                            "textFormat": 0,
+                            "textStyle": "",
+                            "children": [
+                              {
+                                "type": "text",
+                                "version": 1,
+                                "detail": 0,
+                                "format": 0,
+                                "mode": "normal",
+                                "style": "",
+                                "text": "H"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "tablecell",
+                        "version": 1,
+                        "direction": null,
+                        "format": "",
+                        "indent": 0,
+                        "headerState": 1,
+                        "colSpan": 1,
+                        "rowSpan": 1,
+                        "backgroundColor": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "version": 1,
+                            "direction": null,
+                            "format": "",
+                            "indent": 0,
+                            "textFormat": 0,
+                            "textStyle": "",
+                            "children": [
+                              {
+                                "type": "text",
+                                "version": 1,
+                                "detail": 0,
+                                "format": 0,
+                                "mode": "normal",
+                                "style": "",
+                                "text": "I"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "tablerow",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "children": [
+                      {
+                        "type": "tablecell",
+                        "version": 1,
+                        "direction": null,
+                        "format": "",
+                        "indent": 0,
+                        "headerState": 0,
+                        "colSpan": 1,
+                        "rowSpan": 1,
+                        "backgroundColor": "#fbf3db",
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "version": 1,
+                            "direction": null,
+                            "format": "",
+                            "indent": 0,
+                            "textFormat": 0,
+                            "textStyle": "",
+                            "children": [
+                              {
+                                "type": "text",
+                                "version": 1,
+                                "detail": 0,
+                                "format": 0,
+                                "mode": "normal",
+                                "style": "",
+                                "text": "cell"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "tablecell",
+                        "version": 1,
+                        "direction": null,
+                        "format": "",
+                        "indent": 0,
+                        "headerState": 0,
+                        "colSpan": 1,
+                        "rowSpan": 1,
+                        "backgroundColor": null,
+                        "children": [
+                          {
+                            "type": "paragraph",
+                            "version": 1,
+                            "direction": null,
+                            "format": "",
+                            "indent": 0,
+                            "textFormat": 0,
+                            "textStyle": "",
+                            "children": [
+                              {
+                                "type": "text",
+                                "version": 1,
+                                "detail": 0,
+                                "format": 0,
+                                "mode": "normal",
+                                "style": "",
+                                "text": "x"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<table class=\"w-max min-w-full table-fixed caption-bottom text-sm\"><tr class=\"border-b transition-colors hover:bg-muted/50\"><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\"><p class=\"relative m-0 mb-2 last:mb-0\">H</p></th><th class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none bg-muted/50 font-medium\"><p class=\"relative m-0 mb-2 last:mb-0\">I</p></th></tr><tr class=\"border-b transition-colors hover:bg-muted/50\"><td style=\"background-color: #fbf3db\" class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\"><p class=\"relative m-0 mb-2 last:mb-0\">cell</p></td><td class=\"lexical-table-cell relative border p-2 text-start align-middle outline-none\"><p class=\"relative m-0 mb-2 last:mb-0\">x</p></td></tr></table>",
+      "plainText": "H\nI\ncell\nx"
+    },
+    "plate_image": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "shot"
+                  }
+                ]
+              },
+              {
+                "type": "image",
+                "version": 1,
+                "src": "jaggle-file://attachment/33333333-3333-4333-8333-333333333333",
+                "attachmentId": "33333333-3333-4333-8333-333333333333",
+                "altText": "shot.png",
+                "maxWidth": 800
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\">shot</p><img src=\"jaggle-file://attachment/33333333-3333-4333-8333-333333333333\" data-attachment-id=\"33333333-3333-4333-8333-333333333333\" alt=\"shot.png\">",
+      "plainText": "shot"
+    },
+    "plate_file": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": []
+              },
+              {
+                "type": "file",
+                "version": 1,
+                "format": "",
+                "src": "https://bucket.example/report.pdf",
+                "attachmentId": null,
+                "name": "report.pdf",
+                "mimeType": ""
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\"><br></p><a href=\"https://bucket.example/report.pdf\" data-lexical-file=\"https://bucket.example/report.pdf\" data-name=\"report.pdf\">report.pdf</a>",
+      "plainText": ""
+    },
+    "plate_video": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": []
+              },
+              {
+                "type": "video",
+                "version": 1,
+                "format": "",
+                "src": "https://bucket.example/v.mp4",
+                "attachmentId": null,
+                "name": "v.mp4",
+                "mimeType": ""
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\"><br></p><video src=\"https://bucket.example/v.mp4\" data-lexical-video=\"https://bucket.example/v.mp4\" data-name=\"v.mp4\" controls=\"true\"></video>",
+      "plainText": ""
+    },
+    "thread_comment": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 1,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Please "
+                  },
+                  {
+                    "type": "mention",
+                    "version": 1,
+                    "entityType": "user",
+                    "entityId": "user-2",
+                    "title": "Pema",
+                    "href": ""
+                  },
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": " check "
+                  },
+                  {
+                    "type": "link",
+                    "version": 1,
+                    "direction": null,
+                    "format": "",
+                    "indent": 0,
+                    "url": "https://example.com",
+                    "rel": null,
+                    "target": null,
+                    "title": null,
+                    "children": [
+                      {
+                        "type": "text",
+                        "version": 1,
+                        "detail": 0,
+                        "format": 2,
+                        "mode": "normal",
+                        "style": "",
+                        "text": "this"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\"><strong class=\"font-bold\">Please </strong><span data-lexical-mention=\"\" data-entity-type=\"user\" data-entity-id=\"user-2\" data-title=\"Pema\">@Pema</span> check <a href=\"https://example.com\" class=\"cursor-pointer text-primary underline underline-offset-2 hover:text-primary/80\"><em class=\"italic\">this</em></a></p>",
+      "plainText": "Please @Pema check this"
+    },
+    "automation": {
+      "content": {
+        "format": "lexical",
+        "state": {
+          "root": {
+            "type": "root",
+            "version": 1,
+            "direction": null,
+            "format": "",
+            "indent": 0,
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Status changed"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "version": 1,
+                "direction": null,
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "textStyle": "",
+                "children": [
+                  {
+                    "type": "text",
+                    "version": 1,
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "by rule"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "contentHTML": "<p class=\"relative m-0 mb-2 last:mb-0\">Status changed</p><p class=\"relative m-0 mb-2 last:mb-0\">by rule</p>",
+      "plainText": "Status changed\nby rule"
+    }
+  }
+}

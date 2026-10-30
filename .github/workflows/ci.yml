@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build, lint, typecheck, test
+    runs-on: [self-hosted, jaggle-ci]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Builds first: the playground and the package's dist tests use the build.
+      - run: npm run check
+
+      - name: Package contents
+        run: npm pack --dry-run -w @jaggle-ai-hq/editor

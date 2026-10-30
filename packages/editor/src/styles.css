@@ -1,0 +1,433 @@
+/*
+ * @jaggle-ai-hq/editor styles. Import once from the app's Tailwind stylesheet,
+ * after `@import "tailwindcss"`, and point Tailwind at the package's classes:
+ *
+ *   @import "@jaggle-ai-hq/editor/styles.css";
+ *   @source "../node_modules/@jaggle-ai-hq/editor/dist";
+ *
+ * The editor uses the shadcn/ui theme variables (--background, --primary,
+ * --muted-foreground, --radius …), a `.dark` class for dark mode, and
+ * tw-animate-css for its menus.
+ */
+@import "katex/dist/katex.min.css";
+
+.lexical-indent {
+  --lexical-indent-base-value: 32px;
+}
+
+.draggable-block-menu {
+  /* Lexical toggles inline display and opacity; visibility stays here so the exit fade can finish. */
+  display: flex !important;
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 160ms ease-in-out;
+}
+
+.draggable-block-menu[data-visible="true"] {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draggable-block-menu {
+    transition: none;
+  }
+}
+
+p[data-lexical-active-placeholder]::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  padding-inline: inherit;
+  overflow: hidden;
+  color: color-mix(in oklab, var(--muted-foreground) 60%, transparent);
+  content: attr(data-lexical-active-placeholder);
+  pointer-events: none;
+  text-align: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+::highlight(lexical-find-match) {
+  background-color: rgb(250 204 21 / 0.4);
+  color: inherit;
+}
+
+::highlight(lexical-find-match-current) {
+  background-color: rgb(249 115 22 / 0.6);
+  color: inherit;
+}
+
+@media (forced-colors: active) {
+  ::highlight(lexical-find-match) {
+    background-color: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+
+  ::highlight(lexical-find-match-current) {
+    background-color: Mark;
+    color: MarkText;
+    forced-color-adjust: none;
+  }
+}
+
+.lexical-find-match-overlay {
+  position: absolute;
+  pointer-events: none;
+  background-color: rgb(250 204 21 / 0.4);
+}
+
+.lexical-find-match-overlay-current {
+  background-color: rgb(249 115 22 / 0.6);
+}
+
+.lexical-mark {
+  background-color: rgb(251 191 36 / 0.2);
+  border-bottom: 2px solid rgb(251 191 36 / 0.45);
+  padding-bottom: 1px;
+  cursor: pointer;
+}
+
+.lexical-mark.selected {
+  background-color: rgb(251 191 36 / 0.45);
+  border-bottom-color: rgb(245 158 11);
+}
+
+.lexical-mark-overlap {
+  background-color: rgb(251 191 36 / 0.35);
+}
+
+.lexical-mark-overlap.selected {
+  background-color: rgb(251 191 36 / 0.6);
+}
+
+.lexical-comment-highlight {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  background-color: rgb(251 191 36 / 0.35);
+}
+
+.lexical-code {
+  direction: ltr;
+  unicode-bidi: isolate;
+  background-color: var(--card) !important;
+}
+
+.lexical-code::before {
+  content: attr(data-gutter);
+  position: sticky;
+  inset-inline-start: 0;
+  top: 0;
+  float: left;
+  z-index: 1;
+  min-width: 1.75rem;
+  margin-inline-end: 1rem;
+  padding-inline: 0.5rem;
+  color: var(--muted-foreground);
+  text-align: right;
+  white-space: pre-wrap;
+  user-select: none;
+  background-color: var(--card);
+}
+
+.lexical-card [data-lexical-slot="title"] {
+  outline: none;
+  font-weight: 500;
+}
+
+.lexical-card > *:not([data-lexical-slot]) {
+  color: var(--muted-foreground);
+}
+
+.lexical-card [data-lexical-slot="title"] > p:has(br:only-child),
+.lexical-card > p:only-of-type:has(br:only-child) {
+  position: relative;
+}
+
+.lexical-card [data-lexical-slot="title"] > p:has(br:only-child)::before {
+  content: "Title";
+}
+
+.lexical-card > p:only-of-type:has(br:only-child)::before {
+  content: "Body";
+}
+
+:lang(ar)
+  .lexical-card
+  [data-lexical-slot="title"]
+  > p:has(br:only-child)::before {
+  content: "العنوان";
+}
+
+:lang(ar) .lexical-card > p:only-of-type:has(br:only-child)::before {
+  content: "المحتوى";
+}
+
+:lang(he)
+  .lexical-card
+  [data-lexical-slot="title"]
+  > p:has(br:only-child)::before {
+  content: "כותרת";
+}
+
+:lang(he) .lexical-card > p:only-of-type:has(br:only-child)::before {
+  content: "תוכן";
+}
+
+.lexical-card [data-lexical-slot="title"] > p:has(br:only-child)::before,
+.lexical-card > p:only-of-type:has(br:only-child)::before {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lexical-ruby::after {
+  content: attr(data-ruby-annotation);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -0.75em;
+  font-size: 0.5em;
+  line-height: 1;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.lexical-ruby-composing::after {
+  display: none;
+}
+
+.lexical-review-children > p:only-of-type:has(br:only-child),
+.lexical-review-author [data-lexical-slot="author"] > p:has(br:only-child) {
+  position: relative;
+}
+
+.lexical-review-children > p:only-of-type:has(br:only-child)::before {
+  content: "Write a review…";
+}
+
+.lexical-review-author
+  [data-lexical-slot="author"]
+  > p:has(br:only-child)::before {
+  content: "Author";
+}
+
+:lang(ar) .lexical-review-children > p:only-of-type:has(br:only-child)::before {
+  content: "اكتب مراجعة…";
+}
+
+:lang(ar)
+  .lexical-review-author
+  [data-lexical-slot="author"]
+  > p:has(br:only-child)::before {
+  content: "الكاتب";
+}
+
+:lang(he) .lexical-review-children > p:only-of-type:has(br:only-child)::before {
+  content: "כתבו ביקורת…";
+}
+
+:lang(he)
+  .lexical-review-author
+  [data-lexical-slot="author"]
+  > p:has(br:only-child)::before {
+  content: "מחבר";
+}
+
+.lexical-review-children > p:only-of-type:has(br:only-child)::before,
+.lexical-review-author
+  [data-lexical-slot="author"]
+  > p:has(br:only-child)::before {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  color: var(--muted-foreground);
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lexical-collapsible > summary::marker,
+.lexical-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lexical-collapsible > summary::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--muted-foreground);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+[dir="rtl"] .lexical-collapsible > summary::before {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.lexical-collapsible[open] > summary::before,
+[dir="rtl"] .lexical-collapsible[open] > summary::before {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.lexical-collapsible-content {
+  interpolate-size: allow-keywords;
+  overflow: hidden;
+  transition:
+    height 0.2s ease-out,
+    padding 0.2s ease-out,
+    opacity 0.2s ease-out,
+    visibility 0.2s ease-out allow-discrete;
+}
+
+.lexical-collapsible-content[hidden] {
+  content-visibility: visible;
+  display: block;
+  height: 0;
+  padding-block: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    height 0.2s ease-in,
+    padding 0.2s ease-in,
+    opacity 0.2s ease-in,
+    visibility 0.2s ease-in allow-discrete;
+}
+
+details.lexical-collapsible::details-content {
+  interpolate-size: allow-keywords;
+  overflow: hidden;
+  transition:
+    height 0.2s ease-out,
+    opacity 0.2s ease-out,
+    content-visibility 0.2s ease-out allow-discrete;
+}
+
+details.lexical-collapsible:not([open])::details-content {
+  height: 0;
+  opacity: 0;
+  content-visibility: hidden;
+  transition:
+    height 0.2s ease-in,
+    opacity 0.2s ease-in,
+    content-visibility 0.2s ease-in allow-discrete;
+}
+
+.lexical-table-scrollable-wrapper {
+  scrollbar-width: thin;
+}
+
+.lexical-table-scrollable-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.lexical-table-scrollable-wrapper::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+  border-radius: 999px;
+}
+
+.lexical-table-selection *::selection {
+  background-color: transparent;
+}
+
+[contenteditable]:focus-within .lexical-table-selected {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.lexical-table-cell-selected {
+  caret-color: transparent;
+}
+
+[contenteditable]:focus-within .lexical-table-cell-selected::after {
+  position: absolute;
+  inset: 0;
+  background-color: var(--primary);
+  opacity: 0.2;
+  content: "";
+  pointer-events: none;
+}
+
+.lexical-equation {
+  direction: ltr;
+  unicode-bidi: isolate;
+  cursor: default;
+  user-select: none;
+}
+
+span.lexical-equation {
+  display: inline-block;
+}
+
+div.lexical-equation {
+  display: block;
+  text-align: center;
+}
+
+.lexical-equation.focused {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.katex {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.lexical-pullquote [data-lexical-slot="quote"] {
+  font-size: 1.125rem;
+  font-style: italic;
+  line-height: 1.625;
+  outline: none;
+}
+
+.lexical-pullquote [data-lexical-slot="attribution"] {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  outline: none;
+}
+
+.lexical-pullquote [data-lexical-slot="attribution"]::before {
+  content: "-";
+  user-select: none;
+}
+
+.lexical-datetime-time {
+  position: relative;
+}
+
+.lexical-datetime-time::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* The "@query" being typed while the mention menu is open (mention-plugin).
+   The rounded tint behind it is a separate overlay, since highlights cannot
+   have padding or a radius. */
+::highlight(jaggle-mention-query) {
+  color: var(--primary);
+}
