@@ -1,6 +1,6 @@
 {
   "name": "@jaggle-ai/editor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Jaggle's Lexical rich-text editor for React: document and comment editors with live collaboration, comment threads, version history, AI writing and import/export",
   "license": "MIT",
   "type": "module",
