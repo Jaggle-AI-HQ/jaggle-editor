@@ -5,15 +5,14 @@ This guide adds a working editor to a React 19 app in five steps. It starts with
 
 ## 1. Install the package and its peers
 
-For now the package is on GitHub Packages, published as `@jaggle-ai-hq/editor`. Installing needs the `@jaggle-ai-hq`
-registry and a token with `read:packages`; the [package README](../README.md#install) has the `.yarnrc.yml` and `.npmrc`
-setup. Install it under its real name with an alias, so imports say `@jaggle-ai/editor`:
+Until the package is on npm, install it from its GitHub release. That needs no token or registry setup:
 
 ```bash
-yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0
+yarn add "@jaggle-ai/editor@https://github.com/Jaggle-AI-HQ/jaggle-editor/releases/download/%40jaggle-ai-hq/editor%400.2.0/jaggle-ai-editor-0.2.0.tgz"
 ```
 
-Once it's on npm, install `@jaggle-ai/editor` itself, with no token.
+It's also on GitHub Packages as `@jaggle-ai-hq/editor`, which needs a `read:packages` token. The
+[package README](../README.md#install) has both, and the npm install for later.
 
 Then install the peer dependencies. Each peer must exist once in the app:
 

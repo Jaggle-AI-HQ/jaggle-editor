@@ -6,6 +6,8 @@
 - The package is named `@jaggle-ai/editor`. GitHub Packages only takes the owner's scope, so it is published there as
   `@jaggle-ai-hq/editor`: install it under the alias `@jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0`. Publishing
   to npm as `@jaggle-ai/editor` is set up and needs the `NPM_TOKEN` secret.
+- Each GitHub release carries the package as `jaggle-ai-editor-<version>.tgz`, which installs from its URL with no
+  token.
 - The editor's query keys now start with `"@jaggle-ai/editor"` (`EDITOR_QUERY_KEY`).
 - The code is otherwise the same as 0.1.1.
 

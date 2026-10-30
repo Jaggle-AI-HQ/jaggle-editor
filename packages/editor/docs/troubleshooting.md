@@ -4,8 +4,8 @@
 
 ### `404 Not Found` for `@jaggle-ai/editor`
 
-Until it's published to npm, the package is only on GitHub Packages, as `@jaggle-ai-hq/editor`. Install it under the
-alias: `yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0` (see the [README](../README.md#install)).
+Until it's published to npm, install it from its GitHub release URL, or from GitHub Packages under the alias
+`@jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0` (see the [README](../README.md#install)).
 
 ### `401 Unauthorized` or `404 Not Found` from `npm.pkg.github.com`
 

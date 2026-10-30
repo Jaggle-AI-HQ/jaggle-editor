@@ -5,6 +5,8 @@ name: Publish Package
 #   package goes out as @jaggle-ai-hq/editor, and apps install it under the
 #   @jaggle-ai/editor alias (see the package README). Uses the workflow's token.
 # - npm: public, as @jaggle-ai/editor. Needs the NPM_TOKEN secret.
+# Either way the GitHub release also carries the package as @jaggle-ai/editor
+# (jaggle-ai-editor-<version>.tgz), which installs from its URL with no token.
 on:
   workflow_dispatch:
     inputs:
@@ -99,6 +101,10 @@ jobs:
           fi
         working-directory: packages/editor
 
+      - name: Pack for the release
+        run: npm pack --pack-destination "$RUNNER_TEMP"
+        working-directory: packages/editor
+
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
@@ -112,10 +118,11 @@ jobs:
       - name: Create GitHub Release
         run: |
           TAG="$PACKAGE@${{ steps.version.outputs.new_version }}"
+          ASSET="$RUNNER_TEMP/jaggle-ai-editor-${{ steps.version.outputs.new_version }}.tgz"
           if [ "${{ github.event.inputs.bump }}" = "prerelease" ]; then
-            gh release create "$TAG" --title "$TAG" --generate-notes --prerelease
+            gh release create "$TAG" "$ASSET" --title "$TAG" --generate-notes --prerelease
           else
-            gh release create "$TAG" --title "$TAG" --generate-notes
+            gh release create "$TAG" "$ASSET" --title "$TAG" --generate-notes
           fi
         env:
           GH_TOKEN: ${{ github.token }}

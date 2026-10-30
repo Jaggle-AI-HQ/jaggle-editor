@@ -22,9 +22,17 @@ This README is the reference for installing and for the contracts between apps. 
 
 ## Install
 
-The package is MIT licensed, and its name is `@jaggle-ai/editor`. For now it is published to **GitHub Packages**. Publishing it publicly to npm is set up (the Publish workflow's `npm` registry) and needs the repository's `NPM_TOKEN` secret.
+The package is MIT licensed, and its name is `@jaggle-ai/editor`. Until it's on npm (the Publish workflow's `npm` registry, which needs the repository's `NPM_TOKEN` secret), install it from GitHub in one of two ways.
 
-**From GitHub Packages (today).** GitHub Packages only takes the repository owner's scope, so the package is published there as `@jaggle-ai-hq/editor`. Install it under its real name with an alias, so imports already say `@jaggle-ai/editor` and moving to npm later only changes the dependency:
+**From a GitHub release (no token, recommended for now).** Every release carries the package as `jaggle-ai-editor-<version>.tgz`. The repository is public, so it downloads without a token or any registry setup, in CI and Docker builds too:
+
+```bash
+yarn add "@jaggle-ai/editor@https://github.com/Jaggle-AI-HQ/jaggle-editor/releases/download/%40jaggle-ai-hq/editor%400.2.0/jaggle-ai-editor-0.2.0.tgz"
+```
+
+To upgrade, change the version (twice) in the URL. The release tag is `@jaggle-ai-hq/editor@<version>`, URL-encoded.
+
+**From GitHub Packages.** GitHub Packages only takes the repository owner's scope, so the package is published there as `@jaggle-ai-hq/editor`. Install it under its real name with an alias, so imports already say `@jaggle-ai/editor` and moving to npm later only changes the dependency:
 
 ```bash
 yarn add @jaggle-ai/editor@npm:@jaggle-ai-hq/editor@^0.2.0
@@ -221,4 +229,4 @@ It does the following:
 - publishes a copy of the package under that registry's name (the repository keeps `@jaggle-ai/editor`)
 - commits the version
 - tags the published name and version, e.g. `@jaggle-ai-hq/editor@x.y.z`
-- creates a GitHub release
+- creates a GitHub release carrying `jaggle-ai-editor-<version>.tgz`, which installs from its URL with no token
