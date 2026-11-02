@@ -116,6 +116,17 @@ p[data-lexical-active-placeholder]::before {
   background-color: var(--card) !important;
 }
 
+/* Code colours follow the viewer's mode, whichever theme highlighted the block (extensions/code.ts). */
+.lexical-code[style*="--lexical-code-light"],
+.lexical-code [style*="--lexical-code-light"] {
+  color: var(--lexical-code-light) !important;
+}
+
+.dark .lexical-code[style*="--lexical-code-light"],
+.dark .lexical-code [style*="--lexical-code-light"] {
+  color: var(--lexical-code-dark) !important;
+}
+
 .lexical-code::before {
   content: attr(data-gutter);
   position: sticky;

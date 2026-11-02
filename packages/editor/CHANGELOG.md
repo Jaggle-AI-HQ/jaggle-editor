@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.2
+
+- Fixed: code blocks kept the colours of the mode they were highlighted in, because the Shiki theme and colours are
+  stored on the nodes, in the shared document. A block highlighted in light mode and opened in dark mode was dark
+  text on the dark card, and switching modes rewrote the theme of every block, so people in different modes in a
+  live room overwrote each other's. New blocks are now always highlighted with `github-light`. When rendering, the
+  editor gives each block both its `github-light` and `github-dark` colours, and `styles.css` shows the ones for the
+  viewer's `.dark` class. Switching modes writes nothing. Blocks saved in dark mode by earlier versions keep
+  `github-dark` and show correctly in light mode too. Apps on 0.2.1 or earlier in the same room still rewrite the
+  theme when they switch modes.
+
 ## 0.2.1
 
 - Fixed: a page that passes `source` inline (a new object each render) made the document editor reload its comment
