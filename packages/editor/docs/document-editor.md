@@ -263,6 +263,11 @@ function GeneratedDocument({ source }: { source: DocumentSource }) {
 With `showComments`, people select text (or click an image or video) and add a comment from the toolbar. Threads open
 in a sidebar, with replies, mentions, emoji reactions, editing, deleting and resolving.
 
+The sidebar is laid out as Jaggle Office's comments panel: a New comment card (it opens the new comment's field at the
+top of the sidebar; with the sidebar closed, the field opens by the selected text), All or For you (threads you wrote
+in or are @mentioned in) with a status menu (Open, Resolved, All comments, and the order), and a card per thread.
+Clicking commented text opens the sidebar on its thread.
+
 - Threads live in the document's Y.Doc, so everyone in the room sees them, and they are saved with the document.
 - With the `threads` adapter, every change is also sent to the app, which can notify mentioned people. Threads
   written elsewhere are loaded, and an unread dot follows the server's read marker. See [Adapters](adapters.md#threads).

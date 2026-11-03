@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import {
-  Cancel01Icon,
   PencilEdit01Icon,
   Search01Icon,
   SmileIcon,
@@ -29,10 +29,12 @@ import {
   registerEventListener,
 } from "lexical";
 import {
-  ArrowDownUp,
-  CheckCircle2,
-  CircleDot,
+  Check,
+  ChevronDown,
+  Ellipsis,
+  MessageSquarePlus,
   MessageSquareText,
+  RotateCcw,
   SendHorizontal,
   Trash2,
   X,
@@ -46,18 +48,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "../../../ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 import { Button } from "../../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { Input } from "../../../ui/input";
 import {
   Popover,
   PopoverAnchor,
@@ -76,11 +79,6 @@ import {
   type CommentBodyEditorHandle,
 } from "../../components/comment-body-editor";
 import { HtmlView } from "../../components/html-view";
-import {
-  SidePanelEmpty,
-  SidePanelFilter,
-  SidePanelHeader,
-} from "../../components/side-panel";
 import { useThreadActions } from "../../document/comment-threads";
 import { createId } from "../../document/thread-store";
 import {
@@ -90,7 +88,9 @@ import {
   CommentExtension,
   type CommentState,
   consumePendingSelection,
+  INSERT_INLINE_COMMAND,
   removeThreadMarks,
+  setComposerSlot,
   type Thread,
 } from "../../extensions/comment";
 import { useTranslation } from "../../lib/locale";
@@ -127,13 +127,13 @@ function CommentInputBox({
 
     const mediaAnchor = mediaAnchorRef.current;
     const triggerElem = triggerRef.current;
-    if (mediaAnchor && triggerElem) {
+    if (mediaAnchor) {
       const anchorElement = editor.getElementByKey(mediaAnchor.nodeKey);
-      if (anchorElement) {
+      if (anchorElement && triggerElem) {
         setFloatingAnchorRect(triggerElem, anchorElement.getBoundingClientRect());
-        if (highlightsRef.current) {
-          highlightsRef.current.innerHTML = "";
-        }
+      }
+      if (highlightsRef.current) {
+        highlightsRef.current.innerHTML = "";
       }
       return;
     }
@@ -157,10 +157,13 @@ function CommentInputBox({
       const triggerElem = triggerRef.current;
       const rootElement = editor.getRootElement();
       const parent = rootElement?.parentElement;
-      if (range === null || triggerElem === null || !rootElement || !parent) {
+      if (range === null || !rootElement || !parent) {
         return;
       }
-      setFloatingAnchorRect(triggerElem, range.getBoundingClientRect());
+      // In the comments panel there is no popover to place; the highlight stays.
+      if (triggerElem) {
+        setFloatingAnchorRect(triggerElem, range.getBoundingClientRect());
+      }
 
       let container = highlightsRef.current;
       if (container === null) {
@@ -234,6 +237,53 @@ function CommentInputBox({
     mediaAnchorRef.current = null;
     editor.dispatchCommand(CLOSE_COMMENT_INPUT_COMMAND, undefined);
   }, [actions, editor]);
+
+  // With the comments panel open, the field opens at its top, under the text
+  // it is about, as the panel's own threads read.
+  const slot = useExtensionSignalValue(CommentExtension, "composerSlot");
+  const quote = useMemo(
+    () =>
+      state.pendingMediaAnchor?.quote ??
+      editor.read("latest", () => state.inputSelection?.getTextContent() ?? ""),
+    [editor, state],
+  );
+  if (slot) {
+    return createPortal(
+      <div
+        role="form"
+        aria-label={t.comment}
+        dir={dir}
+        className="rounded-xl border border-primary/60 bg-card p-3 shadow-md ring-3 ring-primary/10"
+      >
+        {quote ? (
+          <p className="line-clamp-2 rounded-md bg-amber-400/30 px-2 py-1 text-xs" title={quote}>
+            {quote}
+          </p>
+        ) : null}
+        <CommentBodyEditor
+          ref={bodyEditorRef}
+          autoFocus
+          placeholder={t.typeComment}
+          className="mt-1 min-h-20 text-[13px]"
+          onSubmit={submit}
+          onCancel={cancel}
+          onEmptyChange={setIsEmpty}
+        />
+        <div className="mt-1 flex items-center gap-2 border-t pt-2">
+          <p className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground">
+            {t.commentComposerHint}
+          </p>
+          <Button variant="ghost" size="sm" onClick={cancel}>
+            {t.cancel}
+          </Button>
+          <Button size="sm" disabled={isEmpty} onClick={() => bodyEditorRef.current?.submit()}>
+            {t.comment}
+          </Button>
+        </div>
+      </div>,
+      slot,
+    );
+  }
 
   return (
     <Popover open>
@@ -313,33 +363,22 @@ export function CommentPlugin() {
   );
 }
 
-function DeleteButton({
+/** Asks before deleting a comment or a whole thread. */
+function DeleteConfirm({
+  open,
   title,
+  onOpenChange,
   onDelete,
-  className,
 }: {
+  open: boolean;
   title: string;
+  onOpenChange: (open: boolean) => void;
   onDelete: () => void;
-  className?: string;
 }) {
   const { t, dir } = useTranslation();
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={t.delete}
-          className={cn("size-6 text-muted-foreground", className)}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <Trash2 />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent
-        dir={dir}
-        onClick={(event) => event.stopPropagation()}
-      >
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent dir={dir} onClick={stopPropagation}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
         </AlertDialogHeader>
@@ -364,13 +403,51 @@ function stopPropagation(event: { stopPropagation: () => void }) {
   event.stopPropagation();
 }
 
+/** A round icon button with a tooltip, for a thread's and a comment's actions. */
+function IconAction({
+  label,
+  className,
+  children,
+  onClick,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className={cn(
+            "flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 [&_svg]:size-4",
+            className,
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClick();
+          }}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 /** Adds a reaction to a comment. */
 function ReactionPicker({
   thread,
   comment,
+  quiet,
 }: {
   thread: Thread;
   comment: Comment;
+  /** Out of the way until the comment is pointed at (it has no reactions yet). */
+  quiet: boolean;
 }) {
   const { t } = useTranslation();
   const actions = useThreadActions();
@@ -381,16 +458,17 @@ function ReactionPicker({
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon"
               aria-label={t.commentAddReaction}
-              className="size-6 rounded-full text-muted-foreground"
+              className={cn(
+                "flex h-6 items-center justify-center rounded-full px-1.5 text-muted-foreground transition-[opacity,color,background-color] hover:bg-muted hover:text-foreground focus-visible:opacity-100",
+                quiet && !open && "opacity-0 group-hover/comment:opacity-100",
+              )}
               onClick={stopPropagation}
             >
               <HugeiconsIcon icon={SmileIcon} size={14} aria-hidden="true" />
-            </Button>
+            </button>
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent>{t.commentAddReaction}</TooltipContent>
@@ -406,7 +484,7 @@ function ReactionPicker({
             key={emoji}
             type="button"
             aria-label={emoji}
-            className="flex size-8 items-center justify-center rounded-md text-lg hover:bg-muted"
+            className="flex size-8 items-center justify-center rounded-md text-lg transition-transform hover:scale-110 hover:bg-muted"
             onClick={() => {
               actions.toggleReaction(thread.id, comment.id, emoji);
               setOpen(false);
@@ -420,15 +498,11 @@ function ReactionPicker({
   );
 }
 
-/** A comment's reactions; nothing until it has one (the picker is in the row's actions). */
+/** A comment's reactions, and the picker beside them. */
 function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
   const actions = useThreadActions();
-  if (comment.reactions.length === 0) {
-    return null;
-  }
-
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-1" onClick={stopPropagation}>
+    <div className="mt-1.5 flex flex-wrap items-center gap-1 ps-8">
       {comment.reactions.map((reaction) => {
         const mine = reaction.userIds.includes(actions.me.id);
         return (
@@ -439,8 +513,8 @@ function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
                 aria-pressed={mine}
                 onClick={() => actions.toggleReaction(thread.id, comment.id, reaction.emoji)}
                 className={cn(
-                  "flex h-6 items-center gap-1 rounded-full border bg-background px-2 text-xs tabular-nums transition-colors hover:bg-muted",
-                  mine && "border-primary/40 bg-primary/10 hover:bg-primary/15",
+                  "flex h-6 items-center gap-1 rounded-full border px-2 text-xs tabular-nums transition-colors hover:border-foreground/20",
+                  mine && "border-primary/50 bg-primary/10 text-primary hover:border-primary/50",
                 )}
               >
                 <span aria-hidden="true" className="text-sm">{reaction.emoji}</span>
@@ -453,124 +527,166 @@ function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
           </Tooltip>
         );
       })}
-      <ReactionPicker thread={thread} comment={comment} />
+      <ReactionPicker thread={thread} comment={comment} quiet={comment.reactions.length === 0} />
     </div>
   );
 }
 
+/** "Just now", "5 min ago", "3 hr ago", "2 days ago". */
+function useWhen(timeStamp: number, rtf: Intl.RelativeTimeFormat, now: number) {
+  const { t } = useTranslation();
+  const minutes = Math.round((timeStamp - now) / 60000);
+  const hours = Math.round(minutes / 60);
+  return minutes > -1
+    ? t.justNow
+    : minutes > -60
+      ? rtf.format(minutes, "minute")
+      : hours > -24
+        ? rtf.format(hours, "hour")
+        : rtf.format(Math.round(hours / 24), "day");
+}
+
+function CommentAvatar({ comment }: { comment: Comment }) {
+  return (
+    <Avatar className="size-6 shrink-0">
+      {comment.authorAvatar ? <AvatarImage src={comment.authorAvatar} alt="" /> : null}
+      <AvatarFallback seed={comment.authorId || comment.author} className="text-[10px] font-semibold">
+        {initials(comment.author)}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+/**
+ * One comment: who and when, its actions (the thread's resolve on the first
+ * one, then a menu with Edit and Delete), the text and its reactions.
+ */
 function CommentRow({
   comment,
   thread,
   rtf,
   now,
+  actions: rowActions,
+  onDelete,
 }: {
   comment: Comment;
   thread: Thread;
   rtf: Intl.RelativeTimeFormat;
   now: number;
+  /** Shown before the menu: the thread's resolve button on its first comment. */
+  actions?: ReactNode;
+  /** Deleting the first comment deletes the thread. */
+  onDelete: () => void;
 }) {
   const { t } = useTranslation();
   const actions = useThreadActions();
   const [editing, setEditing] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const bodyEditorRef = useRef<CommentBodyEditorHandle | null>(null);
-  const minutes = Math.round((comment.timeStamp - now) / 60000);
-  const hours = Math.round(minutes / 60);
-  const when =
-    minutes > -1
-      ? t.justNow
-      : minutes > -60
-        ? rtf.format(minutes, "minute")
-        : hours > -24
-          ? rtf.format(hours, "hour")
-          : rtf.format(Math.round(hours / 24), "day");
+  const when = useWhen(comment.timeStamp, rtf, now);
   const mine = comment.authorId === actions.me.id;
   const body = comment.body;
   // Only your own comments (the backend refuses other edits).
   const editable = mine && !comment.deleted && body !== null;
+  const first = thread.comments[0]?.id === comment.id;
 
   return (
-    <div className="group/comment flex gap-2.5">
-      <Avatar className="size-7 shrink-0">
-        {comment.authorAvatar ? <AvatarImage src={comment.authorAvatar} alt="" /> : null}
-        <AvatarFallback seed={comment.authorId || comment.author} className="text-[11px] font-semibold">
-          {initials(comment.author)}
-        </AvatarFallback>
-      </Avatar>
-      <div className="min-w-0 flex-1">
-        <div className="flex min-h-7 items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{mine ? t.you : comment.author}</span>
+    <div className="group/comment">
+      <div className="flex items-center gap-2">
+        <CommentAvatar comment={comment} />
+        <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
+          <span className="truncate text-[13px] font-semibold" title={comment.author}>
+            {mine ? t.you : comment.author}
+          </span>
           <span
-            className="shrink-0 text-xs text-muted-foreground"
+            className="shrink-0 text-[11px] text-muted-foreground"
             title={new Date(comment.timeStamp).toLocaleString()}
           >
             {when}
             {comment.editedAt ? ` · ${t.commentEdited}` : ""}
           </span>
-          {!comment.deleted && !editing ? (
-            <div
-              className="ms-auto flex shrink-0 items-center opacity-0 transition-opacity group-hover/comment:opacity-100 focus-within:opacity-100 has-data-[state=open]:opacity-100"
-              onClick={stopPropagation}
-            >
-              {comment.reactions.length === 0 && body !== null ? (
-                <ReactionPicker thread={thread} comment={comment} />
-              ) : null}
-              {editable ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t.edit}
-                  className="size-6 text-muted-foreground"
-                  onClick={() => setEditing(true)}
-                >
-                  <HugeiconsIcon icon={PencilEdit01Icon} size={14} aria-hidden="true" />
-                </Button>
-              ) : null}
-              <DeleteButton
-                title={t.deleteCommentConfirm}
-                onDelete={() => actions.deleteComment(thread.id, comment.id)}
-              />
-            </div>
-          ) : null}
         </div>
-        {comment.deleted || body === null ? (
-          <p className="text-sm text-muted-foreground italic">{t.deletedComment}</p>
-        ) : editing ? (
-          <div
-            className="mt-1 rounded-lg border border-input bg-background text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
-            onClick={stopPropagation}
-          >
-            <CommentBodyEditor
-              ref={bodyEditorRef}
-              autoFocus
-              placeholder={t.typeComment}
-              initialBody={body}
-              onSubmit={(next) => {
-                actions.edit(thread.id, comment.id, next);
-                setEditing(false);
-              }}
-              onCancel={() => setEditing(false)}
-            />
-            <div className="flex justify-end gap-1 border-t px-1.5 py-1">
-              <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                {t.cancel}
-              </Button>
-              <Button size="sm" onClick={() => bodyEditorRef.current?.submit()}>
-                {t.save}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <HtmlView html={body.html} commentPreview className="text-sm" />
-            <Reactions thread={thread} comment={comment} />
-          </>
-        )}
+        {rowActions}
+        {!comment.deleted && !editing ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Comment actions"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+                onClick={stopPropagation}
+              >
+                <Ellipsis className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40" onClick={stopPropagation}>
+              {editable ? (
+                <DropdownMenuItem onSelect={() => setEditing(true)}>
+                  <HugeiconsIcon icon={PencilEdit01Icon} size={16} aria-hidden="true" />
+                  {t.edit}
+                </DropdownMenuItem>
+              ) : null}
+              <DropdownMenuItem variant="destructive" onSelect={() => setConfirming(true)}>
+                <Trash2 />
+                {t.delete}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </div>
+      <DeleteConfirm
+        open={confirming}
+        title={first ? t.deleteThreadConfirm : t.deleteCommentConfirm}
+        onOpenChange={setConfirming}
+        onDelete={onDelete}
+      />
+      {comment.deleted || body === null ? (
+        <p className="mt-1 ps-8 text-[13px] text-muted-foreground italic">{t.deletedComment}</p>
+      ) : editing ? (
+        <div
+          className="mt-2 ms-8 rounded-lg border border-input bg-background text-[13px] focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10"
+          onClick={stopPropagation}
+        >
+          <CommentBodyEditor
+            ref={bodyEditorRef}
+            autoFocus
+            placeholder={t.typeComment}
+            initialBody={body}
+            onSubmit={(next) => {
+              actions.edit(thread.id, comment.id, next);
+              setEditing(false);
+            }}
+            onCancel={() => setEditing(false)}
+          />
+          <div className="flex justify-end gap-1 border-t px-1.5 py-1">
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+              {t.cancel}
+            </Button>
+            <Button size="sm" onClick={() => bodyEditorRef.current?.submit()}>
+              {t.save}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <HtmlView html={body.html} commentPreview className="mt-1 ps-8 text-[13px] leading-relaxed" />
+          {!thread.resolved || comment.reactions.length ? <Reactions thread={thread} comment={comment} /> : null}
+        </>
+      )}
     </div>
   );
 }
 
-function ReplyComposer({ thread }: { thread: Thread }) {
+/** The thread's reply field: a rounded field with a send button, as a chat's. */
+function ReplyComposer({
+  thread,
+  autoFocus,
+  onCancel,
+}: {
+  thread: Thread;
+  autoFocus?: boolean;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
   const actions = useThreadActions();
   const bodyEditorRef = useRef<CommentBodyEditorHandle | null>(null);
@@ -578,14 +694,16 @@ function ReplyComposer({ thread }: { thread: Thread }) {
 
   return (
     <div
-      className="mt-3 flex items-end gap-1 rounded-lg border border-input bg-background text-sm transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
+      className="mt-3 flex items-end gap-1 rounded-lg border border-input bg-background text-[13px] transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10"
       onClick={stopPropagation}
     >
       <div className="min-w-0 flex-1">
         <CommentBodyEditor
           ref={bodyEditorRef}
+          autoFocus={autoFocus}
           placeholder={t.replyToComment}
           onSubmit={(body) => actions.reply(thread.id, body)}
+          onCancel={onCancel}
           onEmptyChange={setIsEmpty}
         />
       </div>
@@ -594,7 +712,7 @@ function ReplyComposer({ thread }: { thread: Thread }) {
         size="icon"
         aria-label={t.comment}
         disabled={isEmpty}
-        className="m-1 size-7 shrink-0 rounded-md"
+        className="m-1 size-7 shrink-0 rounded-full"
         onClick={() => bodyEditorRef.current?.submit()}
       >
         <SendHorizontal className="size-3.5 rtl:rotate-180" />
@@ -608,20 +726,30 @@ function ThreadCard({
   thread,
   state,
   active,
+  dimmed,
+  collapsed,
+  canReply,
   rtf,
   now,
+  onToggleCollapsed,
 }: {
   editor: LexicalEditor;
   thread: Thread;
   state: CommentState;
   active: boolean;
+  /** Another thread is picked: this one steps back, as in Google Docs. */
+  dimmed: boolean;
+  collapsed: boolean;
+  canReply: boolean;
   rtf: Intl.RelativeTimeFormat;
   now: number;
+  onToggleCollapsed: () => void;
 }) {
   const { t } = useTranslation();
   const actions = useThreadActions();
   const [expanded, setExpanded] = useState(false);
-  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [replying, setReplying] = useState(false);
+  const cardRef = useRef<HTMLElement | null>(null);
   const hoveredMarks = useRef(new Set<HTMLElement>());
 
   // Hovering the card lights up its text in the document.
@@ -716,120 +844,173 @@ function ThreadCard({
     );
   };
 
-  const comments = thread.comments;
-  const hidden = expanded || comments.length <= 3 ? 0 : comments.length - 2;
-  const shown = hidden > 0 ? [comments[0], comments[comments.length - 1]] : comments;
+  const deleteThread = () => {
+    actions.deleteThread(thread.id);
+    removeThreadMarks(editor, state, thread.id);
+  };
+
+  const [root, ...replies] = thread.comments;
+  const hidden = expanded || replies.length <= 3 ? 0 : replies.length - 1;
+  const shownReplies = hidden > 0 ? replies.slice(-1) : replies;
   const clickable = state.markNodeMap.has(thread.id) || Boolean(thread.anchorNodeKey);
+  const people = [
+    ...new Set(
+      replies
+        .filter((reply) => !reply.deleted)
+        .map((reply) => (reply.authorId === actions.me.id ? t.you : reply.author)),
+    ),
+  ];
+  // Text threads quote what they are on; media threads name the block.
+  const quote = thread.anchor === "text" ? `“${thread.quote}”` : thread.quote;
 
   return (
-    <div
+    <article
       ref={cardRef}
-      onClick={handleClickThread}
+      aria-current={active ? "true" : undefined}
+      aria-label={thread.quote}
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest("button, input, textarea, a, [role='menu'], [contenteditable='true']")) return;
+        handleClickThread();
+      }}
       onMouseEnter={() => hoverMarks(true)}
       onMouseLeave={() => hoverMarks(false)}
       className={cn(
-        "group/thread scroll-my-3 rounded-xl border bg-background p-3 text-start transition-colors",
-        clickable && "cursor-pointer hover:border-foreground/15",
-        // Picked: a firmer edge, and its quote takes the highlight's colour.
-        active && "border-foreground/25 hover:border-foreground/25",
+        "group/thread relative scroll-my-3 rounded-xl border bg-card text-start transition-[box-shadow,opacity,border-color] duration-200",
+        active
+          ? "border-primary/60 shadow-md ring-3 ring-primary/10"
+          : "hover:border-foreground/20 hover:shadow-sm",
+        clickable && !active && "cursor-pointer",
+        thread.resolved && !active && "bg-card/70",
+        dimmed && "opacity-60 hover:opacity-100",
       )}
     >
-      <div className="flex items-start gap-2">
-        {/* Styled like the highlight in the document, so the two read as a pair. */}
-        <blockquote
+      <div className="flex items-start gap-1.5 px-3 pt-3">
+        {/* Coloured like the highlight in the document, so the two read as a pair. */}
+        <button
+          type="button"
+          title={thread.quote}
           className={cn(
-            "line-clamp-2 min-w-0 flex-1 rounded-e-md border-s-2 border-amber-400 bg-amber-400/10 px-2 py-1 text-xs leading-5 text-foreground/75 transition-colors",
-            active && "border-amber-500 bg-amber-400/25 text-foreground",
-            thread.resolved && "border-muted-foreground/30 bg-muted text-muted-foreground",
+            "min-w-0 flex-1 rounded-md px-2 py-1 text-start text-xs leading-snug transition-colors",
+            thread.resolved
+              ? "bg-muted text-muted-foreground line-through decoration-muted-foreground/40"
+              : active
+                ? "bg-amber-400/30 text-foreground"
+                : "bg-amber-400/15 text-muted-foreground hover:text-foreground",
           )}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleClickThread();
+          }}
         >
-          {thread.quote}
-        </blockquote>
-        <div className="-me-1 flex shrink-0 items-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {thread.resolved ? (
-                // The status is also the way back: a resolved thread says so.
+          <span className="line-clamp-2">{quote}</span>
+        </button>
+        {thread.resolved ? (
+          <span className="mt-0.5 flex h-6 shrink-0 items-center gap-1 rounded-full bg-emerald-500/10 px-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+            <Check className="size-3" aria-hidden="true" />
+            Resolved
+          </span>
+        ) : null}
+        <IconAction label={collapsed ? "Expand thread" : "Collapse thread"} onClick={onToggleCollapsed}>
+          <ChevronDown className={cn("transition-transform", !collapsed && "rotate-180")} />
+        </IconAction>
+      </div>
+
+      {collapsed || !root ? (
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 px-3 pt-2 pb-3 text-start"
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleCollapsed();
+          }}
+        >
+          {root ? <CommentAvatar comment={root} /> : null}
+          <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {root?.authorId === actions.me.id ? t.you : root?.author}
+            </span>{" "}
+            {root?.body?.text ?? ""}
+          </span>
+          {replies.length ? (
+            <span className="shrink-0 text-[11px] text-muted-foreground">
+              {replies.length} {replies.length === 1 ? "reply" : "replies"}
+            </span>
+          ) : null}
+        </button>
+      ) : (
+        <div className="px-3 pt-2.5 pb-3">
+          <CommentRow
+            comment={root}
+            thread={thread}
+            rtf={rtf}
+            now={now}
+            onDelete={deleteThread}
+            actions={
+              <IconAction
+                label={thread.resolved ? t.reopen : t.resolve}
+                className={
+                  thread.resolved
+                    ? "text-primary"
+                    : "text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
+                }
+                onClick={() => actions.setResolved(thread.id, !thread.resolved)}
+              >
+                {thread.resolved ? <RotateCcw /> : <Check />}
+              </IconAction>
+            }
+          />
+          {replies.length ? (
+            <div className="mt-3 flex flex-col gap-3 border-t pt-3">
+              {hidden > 0 ? (
                 <button
                   type="button"
-                  aria-label={t.reopen}
-                  className="group/status flex h-6 items-center gap-1 rounded-full bg-emerald-500/10 px-2 text-xs font-medium text-emerald-700 transition-colors outline-none hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-500/30 dark:text-emerald-400"
+                  className="self-start rounded-sm ps-8 text-xs font-medium text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
                   onClick={(event) => {
                     event.stopPropagation();
-                    actions.setResolved(thread.id, false);
+                    setExpanded(true);
                   }}
                 >
-                  <CheckCircle2 className="size-3.5 group-hover/status:hidden" aria-hidden="true" />
-                  <CircleDot className="hidden size-3.5 group-hover/status:block" aria-hidden="true" />
-                  Resolved
+                  {t.commentMoreReplies.replace("{count}", String(hidden))}
                 </button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t.resolve}
-                  className={cn(
-                    "size-7 text-muted-foreground opacity-0 transition-opacity group-hover/thread:opacity-100 hover:text-emerald-600 focus-visible:opacity-100",
-                    active && "opacity-100",
-                  )}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    actions.setResolved(thread.id, true);
-                  }}
-                >
-                  <CheckCircle2 />
-                </Button>
-              )}
-            </TooltipTrigger>
-            <TooltipContent>
-              {thread.resolved ? t.reopen : t.resolve}
-            </TooltipContent>
-          </Tooltip>
-          <div
-            className={cn(
-              "flex opacity-0 transition-opacity group-hover/thread:opacity-100 focus-within:opacity-100",
-              active && !thread.resolved && "opacity-100",
-            )}
-          >
-            <DeleteButton
-              title={t.deleteThreadConfirm}
-              className="size-7 shrink-0"
-              onDelete={() => {
-                actions.deleteThread(thread.id);
-                removeThreadMarks(editor, state, thread.id);
-              }}
-            />
-          </div>
-        </div>
-      </div>
-      <div className={cn("mt-3 flex flex-col gap-3", thread.resolved && "opacity-75")}>
-        {shown.map((comment, index) => (
-          <div key={comment.id} className="contents">
-            {hidden > 0 && index === 1 ? (
+              ) : null}
+              {shownReplies.map((reply) => (
+                <CommentRow
+                  key={reply.id}
+                  comment={reply}
+                  thread={thread}
+                  rtf={rtf}
+                  now={now}
+                  onDelete={() => actions.deleteComment(thread.id, reply.id)}
+                />
+              ))}
+            </div>
+          ) : null}
+          {/* Like Google Docs: the reply field belongs to the thread in focus. */}
+          {!thread.resolved && canReply ? (
+            active || replying ? (
+              <ReplyComposer thread={thread} autoFocus={replying} onCancel={() => setReplying(false)} />
+            ) : (
               <button
                 type="button"
-                className="ms-9.5 self-start rounded-sm text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
                 onClick={(event) => {
                   event.stopPropagation();
-                  setExpanded(true);
+                  setReplying(true);
                 }}
               >
-                {t.commentMoreReplies.replace("{count}", String(hidden))}
+                Reply
+                {people.length ? <span className="font-normal">· {people.slice(0, 3).join(", ")}</span> : null}
               </button>
-            ) : null}
-            <CommentRow comment={comment} thread={thread} rtf={rtf} now={now} />
-          </div>
-        ))}
-      </div>
-      {/* Like Google Docs: the reply field belongs to the thread in focus. */}
-      {active && !thread.resolved ? (
-        <ReplyComposer thread={thread} />
-      ) : null}
-    </div>
+            )
+          ) : null}
+        </div>
+      )}
+    </article>
   );
 }
 
-type CommentFilter = "all" | "open" | "resolved";
+type CommentStatus = "open" | "resolved" | "all";
+type CommentView = "all" | "for-you";
 type CommentSort = "position" | "recent-activity" | "oldest";
 
 function threadCreatedAt(thread: Thread) {
@@ -857,6 +1038,22 @@ function matchesSearch(thread: Thread, search: string) {
   return haystack.includes(needle);
 }
 
+/** Threads that involve someone: they wrote in it or are @mentioned in it. */
+export function isThreadForMe(thread: Thread, meId: string) {
+  return thread.comments.some(
+    (comment) =>
+      !comment.deleted &&
+      (comment.authorId === meId ||
+        Boolean(comment.body?.html.includes(`data-entity-id="${meId}"`))),
+  );
+}
+
+function matchesStatus(thread: Thread, status: CommentStatus) {
+  if (status === "open") return !thread.resolved;
+  if (status === "resolved") return thread.resolved;
+  return true;
+}
+
 function $threadPositions() {
   const positions = new Map<string, number>();
   let index = 0;
@@ -874,17 +1071,80 @@ function $threadPositions() {
   return positions;
 }
 
+/** Whether the editor has text selected (what a new comment would be on). */
+function useHasTextSelection(editor: LexicalEditor) {
+  const [hasSelection, setHasSelection] = useState(false);
+  useEffect(
+    () =>
+      editor.registerUpdateListener(({ editorState }) => {
+        setHasSelection(
+          editorState.read(() => {
+            const selection = $getSelection();
+            return $isRangeSelection(selection) && !selection.isCollapsed();
+          }),
+        );
+      }),
+    [editor],
+  );
+  return hasSelection;
+}
+
+function CommentsEmpty({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description: string;
+  action?: { label: string; onClick: () => void };
+}) {
+  return (
+    <div className="flex flex-col items-center px-4 py-10 text-center">
+      <span className="relative mb-3 flex size-12 items-center justify-center">
+        <span className="absolute inset-0 rotate-6 rounded-2xl bg-primary/10" />
+        <span className="relative flex size-12 items-center justify-center rounded-2xl border bg-card text-primary shadow-sm">
+          <MessageSquareText className="size-5" />
+        </span>
+      </span>
+      <p className="text-sm font-semibold">{title}</p>
+      <p className="mt-1 max-w-56 text-xs leading-relaxed text-muted-foreground">{description}</p>
+      {action ? (
+        <Button type="button" size="sm" variant="outline" className="mt-3 h-7 text-xs" onClick={action.onClick}>
+          {action.label}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The document's comment threads, laid out as Jaggle Office's comments
+ * panel: a New comment card, All or For you with the status (and the order)
+ * beside it, then a card per thread with its quote, comments and reply field.
+ */
 export function CommentsPanel({ onClose }: { onClose: () => void }) {
   const [editor] = useLexicalComposerContext();
   const { t, language } = useTranslation();
+  const isEditable = useLexicalEditable();
+  const actions = useThreadActions();
   const state = useExtensionDependency(CommentExtension).output;
   const comments = useExtensionSignalValue(CommentExtension, "comments");
   const activeIDs = useExtensionSignalValue(CommentExtension, "activeIDs");
+  const composing = useExtensionSignalValue(CommentExtension, "showCommentInput");
+  const hasSelection = useHasTextSelection(editor);
   const [now, setNow] = useState(() => Date.now());
-  const [filter, setFilter] = useState<CommentFilter>("open");
+  const [view, setView] = useState<CommentView>("all");
+  const [status, setStatus] = useState<CommentStatus>("open");
   const [sort, setSort] = useState<CommentSort>("position");
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+
+  // A new comment's field opens here while the panel is open.
+  const slotRef = useCallback(
+    (node: HTMLDivElement | null) => setComposerSlot(state, node),
+    [state],
+  );
 
   const closeSearch = () => {
     setSearching(false);
@@ -911,34 +1171,35 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
     () => comments.filter((item): item is Thread => item.type === "thread"),
     [comments],
   );
+  const openCount = threads.filter((thread) => !thread.resolved).length;
+  const resolvedCount = threads.length - openCount;
+  const byStatus = threads.filter((thread) => matchesStatus(thread, status));
+  const allCount = byStatus.length;
+  const forYouCount = byStatus.filter((thread) => isThreadForMe(thread, actions.me.id)).length;
 
-  const counts = useMemo(
-    () => ({
-      total: threads.length,
-      open: threads.filter((thread) => !thread.resolved).length,
-      resolved: threads.filter((thread) => thread.resolved).length,
-    }),
-    [threads],
-  );
-
-  // A thread picked in the document shows even when the filter hides it.
+  // A thread picked in the document shows even when the status hides it.
   const activeResolved = threads.some(
     (thread) => thread.resolved && activeIDs.includes(thread.id),
   );
   const [seenActiveResolved, setSeenActiveResolved] = useState(activeResolved);
   if (activeResolved !== seenActiveResolved) {
     setSeenActiveResolved(activeResolved);
-    if (activeResolved && filter === "open") setFilter("all");
+    if (activeResolved && status === "open") setStatus("all");
+  }
+  // ...and expanded.
+  const [seenActive, setSeenActive] = useState(activeIDs);
+  if (activeIDs !== seenActive) {
+    setSeenActive(activeIDs);
+    if (collapsed.some((id) => activeIDs.includes(id))) {
+      setCollapsed((current) => current.filter((id) => !activeIDs.includes(id)));
+    }
   }
 
   const visible = useMemo(() => {
     const positions = editor.read(() => $threadPositions());
     return threads
-      .filter((thread) => {
-        if (filter === "open") return !thread.resolved;
-        if (filter === "resolved") return thread.resolved;
-        return true;
-      })
+      .filter((thread) => matchesStatus(thread, status))
+      .filter((thread) => view === "all" || isThreadForMe(thread, actions.me.id))
       .filter((thread) => matchesSearch(thread, search))
       .sort((left, right) => {
         if (sort === "recent-activity") {
@@ -961,155 +1222,205 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
           Number.MAX_VALUE;
         return leftPosition - rightPosition;
       });
-  }, [editor, filter, search, sort, threads]);
-
-  const filters = [
-    { value: "open" as const, label: "Open", count: counts.open },
-    { value: "resolved" as const, label: "Resolved", count: counts.resolved },
-    { value: "all" as const, label: "All", count: counts.total },
-  ];
+  }, [actions.me.id, editor, search, sort, status, threads, view]);
+  const hasActive = visible.some((thread) => activeIDs.includes(thread.id));
 
   let emptyTitle = t.noComments;
-  let emptyDescription =
-    "Select text or a media block and add a comment to start a discussion.";
+  let emptyDescription = isEditable
+    ? "Select text, then add a comment to start a conversation."
+    : "Comments people add will show here.";
+  let emptyAction: { label: string; onClick: () => void } | undefined;
   if (search.trim()) {
-    emptyTitle = "No matching comments";
-    emptyDescription = "Try a different search term.";
-  } else if (threads.length > 0 && filter === "open") {
-    emptyTitle = "No open comments";
-    emptyDescription = "All comment threads have been resolved.";
-  } else if (threads.length > 0 && filter === "resolved") {
+    emptyTitle = `Nothing matches “${search.trim()}”`;
+    emptyDescription = "Try other words, or a person’s name.";
+    emptyAction = { label: "Clear search", onClick: closeSearch };
+  } else if (view === "for-you") {
+    emptyTitle = "Nothing for you right now";
+    emptyDescription = "Comments you write, reply to, or are @mentioned in show here.";
+    if (threads.length) emptyAction = { label: "See all comments", onClick: () => setView("all") };
+  } else if (status === "open" && resolvedCount) {
+    emptyTitle = "All caught up";
+    emptyDescription = "Every comment in this document is resolved.";
+    emptyAction = { label: `Show ${resolvedCount} resolved`, onClick: () => setStatus("resolved") };
+  } else if (status === "resolved") {
     emptyTitle = "No resolved comments";
-    emptyDescription = "No threads have been resolved yet.";
+    emptyDescription = "Resolved threads show here, so you can reopen them.";
   }
 
+  const statusLabel = status === "open" ? "Open" : status === "resolved" ? "Resolved" : "All";
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      {searching ? (
-        <div className="flex h-12 shrink-0 items-center gap-1 border-b bg-background ps-3 pe-2">
-          <div className="min-w-0 flex-1">
-            <Input
-              usage="search"
-              variant="minimal"
-              autoFocus
-              placeholder={t.searchComments}
+    <div className="flex min-h-0 flex-1 flex-col bg-muted/40">
+      <div className="flex shrink-0 flex-col gap-3 px-3 pt-3 pb-2">
+        <div className="flex items-center gap-2 ps-1">
+          <h2 className="text-sm font-semibold">{t.comments}</h2>
+          {openCount ? (
+            <span className="rounded-full bg-primary/10 px-1.5 py-px text-[11px] font-semibold text-primary tabular-nums">
+              {openCount}
+            </span>
+          ) : null}
+          <div className="flex-1" />
+          <IconAction
+            label={searching ? "Close comment search" : t.searchComments.replace(/\.+$/, "")}
+            onClick={() => (searching ? closeSearch() : setSearching(true))}
+          >
+            <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
+          </IconAction>
+          <IconAction label="Close comments" onClick={onClose}>
+            <X />
+          </IconAction>
+        </div>
+
+        {searching ? (
+          <div className="flex h-8 items-center gap-2 rounded-md border border-input bg-card px-2.5 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
+            <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="size-3.5 shrink-0 text-muted-foreground" />
+            <input
               aria-label={t.searchComments}
-              onSearchChange={setSearch}
+              autoFocus
+              className="h-full min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
+              placeholder="Search comments and people"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Escape") {
                   event.preventDefault();
                   closeSearch();
                 }
               }}
-              className="h-8"
             />
           </div>
-          <Button
+        ) : null}
+
+        {isEditable && !composing ? (
+          <button
             type="button"
-            size="icon"
-            variant="ghost"
-            className="size-7 shrink-0 text-muted-foreground"
-            aria-label="Close search"
-            onClick={closeSearch}
+            disabled={!hasSelection}
+            // Keeps the editor's selection, which the new comment is on.
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => editor.dispatchCommand(INSERT_INLINE_COMMAND, undefined)}
+            className="group flex items-center gap-2.5 rounded-lg border border-dashed border-foreground/20 bg-card px-3 py-2.5 text-start transition-colors enabled:hover:border-primary enabled:hover:bg-primary/5 disabled:cursor-not-allowed"
           >
-            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
-          </Button>
-        </div>
-      ) : (
-        <SidePanelHeader title={t.comments} count={counts.total}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+            <span
+              className={cn(
+                "flex size-7 shrink-0 items-center justify-center rounded-full",
+                hasSelection ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+              )}
+            >
+              <MessageSquarePlus className="size-3.5" />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className={cn("text-[13px] font-medium", !hasSelection && "text-muted-foreground")}>
+                {hasSelection ? "Add a comment" : "New comment"}
+              </span>
+              <span className="truncate text-[11px] text-muted-foreground">
+                {hasSelection ? "On your selection" : "Select text in the document to comment on it"}
+              </span>
+            </span>
+          </button>
+        ) : null}
+
+        <div className="flex items-center gap-2">
+          <div aria-label="Comment view" role="tablist" className="flex h-8 flex-1 gap-0.5 rounded-md bg-muted p-[2px]">
+            {(
+              [
+                ["all", "All", allCount],
+                ["for-you", "For you", forYouCount],
+              ] as const
+            ).map(([value, label, count]) => (
+              <button
+                key={value}
                 type="button"
-                size="icon"
-                variant="ghost"
-                className="size-7 text-muted-foreground"
-                aria-label={t.searchComments}
-                onClick={() => setSearching(true)}
+                role="tab"
+                aria-selected={view === value}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-sm text-xs transition-colors",
+                  view === value
+                    ? "bg-card font-semibold text-foreground shadow-sm"
+                    : "font-medium text-muted-foreground hover:text-foreground",
+                )}
+                onClick={() => setView(value)}
               >
-                <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t.searchComments}</TooltipContent>
-          </Tooltip>
+                {label}
+                {count ? <span className="text-[11px] font-normal text-muted-foreground tabular-nums">{count}</span> : null}
+              </button>
+            ))}
+          </div>
           <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className={cn(
-                      "size-7 text-muted-foreground",
-                      sort !== "position" && "text-primary",
-                    )}
-                    aria-label="Sort comments"
-                  >
-                    <ArrowDownUp className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Sort</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end" className="min-w-40">
-              <DropdownMenuRadioGroup
-                value={sort}
-                onValueChange={(value) => setSort(value as CommentSort)}
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Comment status"
+                className="flex h-8 items-center gap-1 rounded-md border border-input bg-card px-2.5 text-xs font-medium hover:border-foreground/20"
               >
+                {statusLabel}
+                <ChevronDown className="size-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {(
+                [
+                  ["open", "Open", openCount],
+                  ["resolved", "Resolved", resolvedCount],
+                  ["all", "All comments", threads.length],
+                ] as const
+              ).map(([value, label, count]) => (
+                <DropdownMenuItem key={value} onSelect={() => setStatus(value)}>
+                  <span className="flex-1">{label}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
+                  {status === value ? <Check className="text-primary" /> : <span className="size-4" />}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Order</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={sort} onValueChange={(value) => setSort(value as CommentSort)}>
                 <DropdownMenuRadioItem value="position">Position in document</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="recent-activity">Recent activity</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3 pt-1 pb-4">
+        <div ref={slotRef} className="contents" />
+        {visible.length === 0 && !composing ? (
+          <CommentsEmpty title={emptyTitle} description={emptyDescription} action={emptyAction} />
+        ) : null}
+        {visible.map((thread) => {
+          const active = activeIDs.includes(thread.id);
+          return (
+            <ThreadCard
+              key={thread.id}
+              editor={editor}
+              thread={thread}
+              state={state}
+              active={active}
+              dimmed={hasActive && !active}
+              collapsed={collapsed.includes(thread.id)}
+              canReply={isEditable}
+              rtf={rtf}
+              now={now}
+              onToggleCollapsed={() =>
+                setCollapsed((current) =>
+                  current.includes(thread.id)
+                    ? current.filter((id) => id !== thread.id)
+                    : [...current, thread.id],
+                )
+              }
+            />
+          );
+        })}
+        {status === "open" && resolvedCount && visible.length ? (
+          <button
             type="button"
-            size="icon"
-            variant="ghost"
-            className="size-7 text-muted-foreground"
-            aria-label="Close comments"
-            onClick={onClose}
+            className="mt-1 flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => setStatus("resolved")}
           >
-            <X className="size-4" />
-          </Button>
-        </SidePanelHeader>
-      )}
-      <SidePanelFilter
-        label="Show comments"
-        value={filter}
-        options={filters}
-        onChange={setFilter}
-      />
-      <div className="min-h-0 flex-1 overflow-y-auto bg-muted/30 px-3 py-3">
-        {visible.length === 0 ? (
-          <SidePanelEmpty
-            icon={<MessageSquareText />}
-            title={emptyTitle}
-            description={emptyDescription}
-            action={
-              search.trim()
-                ? { label: "Clear search", onClick: closeSearch }
-                : threads.length > 0 && filter !== "all"
-                  ? { label: "Show all comments", onClick: () => setFilter("all") }
-                  : undefined
-            }
-          />
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {visible.map((thread) => (
-              <ThreadCard
-                key={thread.id}
-                editor={editor}
-                thread={thread}
-                state={state}
-                active={activeIDs.includes(thread.id)}
-                rtf={rtf}
-                now={now}
-              />
-            ))}
-          </div>
-        )}
+            <Check className="size-3.5" />
+            {resolvedCount} resolved {resolvedCount === 1 ? "comment" : "comments"}
+          </button>
+        ) : null}
       </div>
     </div>
   );

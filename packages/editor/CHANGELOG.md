@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.0
+
+- The comments panel is laid out as Jaggle Office's (its paged documents, sheets, slides and PDFs), so comments look
+  alike across Jaggle:
+  - The title row's count is the open threads, with search (a field under the title) and close.
+  - A New comment card: dashed until text is selected, then "Add a comment · On your selection", which opens the
+    new comment's field at the top of the panel (with the text it is on still highlighted in the document). With the
+    panel closed, the field still opens by the selected text.
+  - All or For you (threads you wrote in or are @mentioned in), with the status beside it in a menu (Open, Resolved,
+    All comments, with counts) that also holds the order (position, recent activity, oldest first).
+  - Cards: the quote in the highlight's amber, a Resolved pill, and a chevron that folds a thread to one line. Each
+    comment has its author, time, and a menu with Edit and Delete; the first also has Resolve (or Reopen). Replies
+    sit under a rule. The picked thread gets a ring and the reply field; the others step back and offer "Reply".
+  - Empty states say what to do next, with a way out of a filter or search, and an open list ends with "N resolved
+    comments".
+
 ## 0.5.0
 
 - The editor's header actions are in one order: version history, then comments, then ⋯. Their tooltips show

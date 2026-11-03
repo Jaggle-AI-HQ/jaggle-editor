@@ -87,6 +87,11 @@ function createCommentState() {
       mediaAnchors: new Map<string, NodeKey>(),
       mediaAnchorRevision: 0,
       showCommentInput: false,
+      /**
+       * Where the comments panel shows a new comment's field while it is open
+       * (its top); without one the field opens by the selected text.
+       */
+      composerSlot: null as HTMLElement | null,
     }),
     markNodeMap: new Map<string, Set<NodeKey>>(),
     pendingMediaAnchor: null as { nodeKey: NodeKey; quote: string } | null,
@@ -101,6 +106,11 @@ export type CommentState = ReturnType<typeof createCommentState>;
 /** Shows a new set of stored threads (from the thread store). */
 export function setThreads(state: CommentState, threads: Comments): void {
   state.threads.value = threads;
+}
+
+/** Where a new comment's field opens: the comments panel's top, or null for by the text. */
+export function setComposerSlot(state: CommentState, slot: HTMLElement | null): void {
+  state.composerSlot.value = slot;
 }
 
 /** Adds a thread id to a media block. */
