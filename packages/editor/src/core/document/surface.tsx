@@ -76,6 +76,7 @@ import { ContentEditable } from "../plugins/content-editable";
 import { DraggableBlockPlugin } from "../plugins/draggable-block-plugin";
 import { EmojiPickerPlugin } from "../plugins/emoji-picker-plugin";
 import {
+  CommentHighlightClickPlugin,
   CommentPlugin,
   useLatestCommentActivity,
 } from "../plugins/floating/comment-plugin";
@@ -331,6 +332,7 @@ function DocumentWorkspace({
     ),
     panel === "versions",
   );
+  const openComments = useCallback(() => setPanel("comments"), [setPanel]);
   const hasActions =
     showComments || showVersionHistory || showImport || showExport;
   const hasHeader =
@@ -363,6 +365,7 @@ function DocumentWorkspace({
     <DocumentUiProvider value={ui}>
     <ThreadActionsProvider value={threadActions}>
     <ThreadStorePlugin doc={threadDoc} sync={threadSync} me={me} ready={ready} />
+    {showComments ? <CommentHighlightClickPlugin onOpen={openComments} /> : null}
     <UploadRegistryProvider>
     <ImageUploadPlugin scope={imageScope}>
       <MediaUploadPlugin scope={imageScope}>

@@ -27,7 +27,7 @@ import {
 } from "../../ui/popover";
 
 import { useTranslation } from "../lib/locale";
-import { useFloatingCollisionBoundary } from "../plugins/floating/floating-utils";
+import { editorMenuPadding } from "../plugins/floating/floating-utils";
 import type {
   MentionEntityType,
   MentionResult,
@@ -127,7 +127,6 @@ export function MentionMenu({
 }) {
   const [editor] = useLexicalComposerContext();
   const { t, dir } = useTranslation();
-  const collisionBoundary = useFloatingCollisionBoundary(editor);
   const groups = groupedItems(items);
   // A virtual anchor in viewport coordinates. A fixed-position element would
   // be offset inside transformed ancestors such as the comment composer's
@@ -159,8 +158,7 @@ export function MentionMenu({
         align="start"
         sideOffset={2}
         updatePositionStrategy="always"
-        collisionPadding={8}
-        collisionBoundary={constrainToEditor ? (collisionBoundary ?? undefined) : undefined}
+        collisionPadding={constrainToEditor ? editorMenuPadding(editor.getRootElement()) : 8}
         sticky="partial"
         onOpenAutoFocus={(event) => event.preventDefault()}
         onCloseAutoFocus={(event) => event.preventDefault()}

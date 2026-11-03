@@ -18,6 +18,7 @@ import { createDOMRange, createRectsFromDOMRange } from "@lexical/selection";
 import { $dfs, mergeRegister } from "@lexical/utils";
 import {
   $createNodeSelection,
+  $getNearestNodeFromDOMNode,
   $getNodeByKey,
   $getSelection,
   $isRangeSelection,
@@ -31,6 +32,7 @@ import {
   ArrowDownUp,
   CheckCircle2,
   CircleDot,
+  MessageSquareText,
   SendHorizontal,
   Trash2,
   X,
@@ -62,7 +64,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../ui/popover";
-import { Tabs, TabsList, TabsTrigger } from "../../../ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -75,6 +76,11 @@ import {
   type CommentBodyEditorHandle,
 } from "../../components/comment-body-editor";
 import { HtmlView } from "../../components/html-view";
+import {
+  SidePanelEmpty,
+  SidePanelFilter,
+  SidePanelHeader,
+} from "../../components/side-panel";
 import { useThreadActions } from "../../document/comment-threads";
 import { createId } from "../../document/thread-store";
 import {
@@ -354,17 +360,75 @@ function initials(name: string) {
 /** Quick reactions, like the old editor's comment threads. */
 const QUICK_REACTIONS = ["👍", "❤️", "😄", "🎉", "👀", "✅"];
 
-function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
+function stopPropagation(event: { stopPropagation: () => void }) {
+  event.stopPropagation();
+}
+
+/** Adds a reaction to a comment. */
+function ReactionPicker({
+  thread,
+  comment,
+}: {
+  thread: Thread;
+  comment: Comment;
+}) {
   const { t } = useTranslation();
   const actions = useThreadActions();
   const [open, setOpen] = useState(false);
-  const toggle = (emoji: string) => actions.toggleReaction(thread.id, comment.id, emoji);
 
   return (
-    <div
-      className="mt-1.5 flex flex-wrap items-center gap-1"
-      onClick={(event) => event.stopPropagation()}
-    >
+    <Popover open={open} onOpenChange={setOpen}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={t.commentAddReaction}
+              className="size-6 rounded-full text-muted-foreground"
+              onClick={stopPropagation}
+            >
+              <HugeiconsIcon icon={SmileIcon} size={14} aria-hidden="true" />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>{t.commentAddReaction}</TooltipContent>
+      </Tooltip>
+      {/* Portalled, but its clicks still reach the thread card through React. */}
+      <PopoverContent
+        align="start"
+        className="flex w-auto gap-0.5 p-1"
+        onClick={stopPropagation}
+      >
+        {QUICK_REACTIONS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            aria-label={emoji}
+            className="flex size-8 items-center justify-center rounded-md text-lg hover:bg-muted"
+            onClick={() => {
+              actions.toggleReaction(thread.id, comment.id, emoji);
+              setOpen(false);
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/** A comment's reactions; nothing until it has one (the picker is in the row's actions). */
+function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
+  const actions = useThreadActions();
+  if (comment.reactions.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-1" onClick={stopPropagation}>
       {comment.reactions.map((reaction) => {
         const mine = reaction.userIds.includes(actions.me.id);
         return (
@@ -373,13 +437,13 @@ function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
               <button
                 type="button"
                 aria-pressed={mine}
-                onClick={() => toggle(reaction.emoji)}
+                onClick={() => actions.toggleReaction(thread.id, comment.id, reaction.emoji)}
                 className={cn(
-                  "flex h-6 items-center gap-1 rounded-full border px-2 text-sm tabular-nums transition-colors hover:bg-muted",
+                  "flex h-6 items-center gap-1 rounded-full border bg-background px-2 text-xs tabular-nums transition-colors hover:bg-muted",
                   mine && "border-primary/40 bg-primary/10 hover:bg-primary/15",
                 )}
               >
-                <span aria-hidden="true">{reaction.emoji}</span>
+                <span aria-hidden="true" className="text-sm">{reaction.emoji}</span>
                 {reaction.userIds.length}
               </button>
             </TooltipTrigger>
@@ -389,39 +453,7 @@ function Reactions({ thread, comment }: { thread: Thread; comment: Comment }) {
           </Tooltip>
         );
       })}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={t.commentAddReaction}
-            className={cn(
-              "size-6 rounded-full text-muted-foreground",
-              comment.reactions.length === 0 &&
-                "opacity-0 group-hover/comment:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100",
-            )}
-          >
-            <HugeiconsIcon icon={SmileIcon} size={14} aria-hidden="true" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="flex w-auto gap-0.5 p-1">
-          {QUICK_REACTIONS.map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              aria-label={emoji}
-              className="flex size-8 items-center justify-center rounded-md text-lg hover:bg-muted"
-              onClick={() => {
-                toggle(emoji);
-                setOpen(false);
-              }}
-            >
-              {emoji}
-            </button>
-          ))}
-        </PopoverContent>
-      </Popover>
+      <ReactionPicker thread={thread} comment={comment} />
     </div>
   );
 }
@@ -458,34 +490,37 @@ function CommentRow({
 
   return (
     <div className="group/comment flex gap-2.5">
-      <Avatar className="mt-0.5 size-6 shrink-0">
+      <Avatar className="size-7 shrink-0">
         {comment.authorAvatar ? <AvatarImage src={comment.authorAvatar} alt="" /> : null}
-        <AvatarFallback seed={comment.authorId || comment.author} className="text-[10px] font-semibold">
+        <AvatarFallback seed={comment.authorId || comment.author} className="text-[11px] font-semibold">
           {initials(comment.author)}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <div className="flex min-h-6 items-center gap-1.5">
-          <span className="truncate font-medium">{mine ? t.you : comment.author}</span>
+        <div className="flex min-h-7 items-center gap-1.5">
+          <span className="truncate text-sm font-medium">{mine ? t.you : comment.author}</span>
           <span
-            className="shrink-0 text-sm text-muted-foreground"
+            className="shrink-0 text-xs text-muted-foreground"
             title={new Date(comment.timeStamp).toLocaleString()}
           >
             {when}
             {comment.editedAt ? ` · ${t.commentEdited}` : ""}
           </span>
           {!comment.deleted && !editing ? (
-            <div className="ms-auto flex items-center opacity-0 group-hover/comment:opacity-100 focus-within:opacity-100">
+            <div
+              className="ms-auto flex shrink-0 items-center opacity-0 transition-opacity group-hover/comment:opacity-100 focus-within:opacity-100 has-data-[state=open]:opacity-100"
+              onClick={stopPropagation}
+            >
+              {comment.reactions.length === 0 && body !== null ? (
+                <ReactionPicker thread={thread} comment={comment} />
+              ) : null}
               {editable ? (
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-label={t.edit}
                   className="size-6 text-muted-foreground"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setEditing(true);
-                  }}
+                  onClick={() => setEditing(true)}
                 >
                   <HugeiconsIcon icon={PencilEdit01Icon} size={14} aria-hidden="true" />
                 </Button>
@@ -498,11 +533,11 @@ function CommentRow({
           ) : null}
         </div>
         {comment.deleted || body === null ? (
-          <p className="text-muted-foreground italic">{t.deletedComment}</p>
+          <p className="text-sm text-muted-foreground italic">{t.deletedComment}</p>
         ) : editing ? (
           <div
-            className="mt-1 rounded-md border border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
-            onClick={(event) => event.stopPropagation()}
+            className="mt-1 rounded-lg border border-input bg-background text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
+            onClick={stopPropagation}
           >
             <CommentBodyEditor
               ref={bodyEditorRef}
@@ -526,7 +561,7 @@ function CommentRow({
           </div>
         ) : (
           <>
-            <HtmlView html={body.html} commentPreview className="" />
+            <HtmlView html={body.html} commentPreview className="text-sm" />
             <Reactions thread={thread} comment={comment} />
           </>
         )}
@@ -543,8 +578,8 @@ function ReplyComposer({ thread }: { thread: Thread }) {
 
   return (
     <div
-      className="mt-3 flex items-end gap-1 rounded-md border border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
-      onClick={(event) => event.stopPropagation()}
+      className="mt-3 flex items-end gap-1 rounded-lg border border-input bg-background text-sm transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
+      onClick={stopPropagation}
     >
       <div className="min-w-0 flex-1">
         <CommentBodyEditor
@@ -555,14 +590,14 @@ function ReplyComposer({ thread }: { thread: Thread }) {
         />
       </div>
       <Button
-        variant="ghost"
+        variant={isEmpty ? "ghost" : "default"}
         size="icon"
         aria-label={t.comment}
         disabled={isEmpty}
-        className="m-0.5 size-7 shrink-0"
+        className="m-1 size-7 shrink-0 rounded-md"
         onClick={() => bodyEditorRef.current?.submit()}
       >
-        <SendHorizontal className="rtl:rotate-180" />
+        <SendHorizontal className="size-3.5 rtl:rotate-180" />
       </Button>
     </div>
   );
@@ -586,6 +621,36 @@ function ThreadCard({
   const { t } = useTranslation();
   const actions = useThreadActions();
   const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const hoveredMarks = useRef(new Set<HTMLElement>());
+
+  // Hovering the card lights up its text in the document.
+  const hoverMarks = (on: boolean) => {
+    const marks = hoveredMarks.current;
+    for (const element of marks) element.classList.remove("hovered");
+    marks.clear();
+    if (!on) return;
+    for (const key of state.markNodeMap.get(thread.id) ?? []) {
+      const element = editor.getElementByKey(key);
+      if (element) {
+        element.classList.add("hovered");
+        marks.add(element);
+      }
+    }
+  };
+  useEffect(() => {
+    const marks = hoveredMarks.current;
+    return () => {
+      for (const element of marks) element.classList.remove("hovered");
+    };
+  }, []);
+
+  // A thread picked in the document (its highlight clicked) comes into view.
+  useEffect(() => {
+    if (!active) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    cardRef.current?.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+  }, [active]);
 
   // The thread's highlight or media block, a fixed distance below the top of
   // the editor's visible area.
@@ -654,65 +719,96 @@ function ThreadCard({
   const comments = thread.comments;
   const hidden = expanded || comments.length <= 3 ? 0 : comments.length - 2;
   const shown = hidden > 0 ? [comments[0], comments[comments.length - 1]] : comments;
+  const clickable = state.markNodeMap.has(thread.id) || Boolean(thread.anchorNodeKey);
 
   return (
     <div
+      ref={cardRef}
       onClick={handleClickThread}
+      onMouseEnter={() => hoverMarks(true)}
+      onMouseLeave={() => hoverMarks(false)}
       className={cn(
-        "group/thread rounded-lg border bg-card p-3 text-start transition-colors",
-        (state.markNodeMap.has(thread.id) || thread.anchorNodeKey) &&
-          "cursor-pointer hover:border-foreground/15",
-        active && "border-primary/40 ring-2 ring-primary/15 hover:border-primary/40",
-        thread.resolved && "opacity-70",
+        "group/thread scroll-my-3 rounded-xl border bg-background p-3 text-start transition-colors",
+        clickable && "cursor-pointer hover:border-foreground/15",
+        // Picked: a firmer edge, and its quote takes the highlight's colour.
+        active && "border-foreground/25 hover:border-foreground/25",
       )}
     >
       <div className="flex items-start gap-2">
         {/* Styled like the highlight in the document, so the two read as a pair. */}
-        <blockquote className="line-clamp-2 min-w-0 flex-1 border-s-2 border-amber-400 ps-2 text-sm text-muted-foreground">
-          {thread.quote}
-        </blockquote>
-        <div
+        <blockquote
           className={cn(
-            "-mt-1 -me-1 flex shrink-0 items-center opacity-0 transition-opacity group-hover/thread:opacity-100 focus-within:opacity-100",
-            active && "opacity-100",
+            "line-clamp-2 min-w-0 flex-1 rounded-e-md border-s-2 border-amber-400 bg-amber-400/10 px-2 py-1 text-xs leading-5 text-foreground/75 transition-colors",
+            active && "border-amber-500 bg-amber-400/25 text-foreground",
+            thread.resolved && "border-muted-foreground/30 bg-muted text-muted-foreground",
           )}
         >
+          {thread.quote}
+        </blockquote>
+        <div className="-me-1 flex shrink-0 items-center">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={thread.resolved ? t.reopen : t.resolve}
-                className="size-7 text-muted-foreground"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  actions.setResolved(thread.id, !thread.resolved);
-                }}
-              >
-                {thread.resolved ? <CircleDot /> : <CheckCircle2 />}
-              </Button>
+              {thread.resolved ? (
+                // The status is also the way back: a resolved thread says so.
+                <button
+                  type="button"
+                  aria-label={t.reopen}
+                  className="group/status flex h-6 items-center gap-1 rounded-full bg-emerald-500/10 px-2 text-xs font-medium text-emerald-700 transition-colors outline-none hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-500/30 dark:text-emerald-400"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    actions.setResolved(thread.id, false);
+                  }}
+                >
+                  <CheckCircle2 className="size-3.5 group-hover/status:hidden" aria-hidden="true" />
+                  <CircleDot className="hidden size-3.5 group-hover/status:block" aria-hidden="true" />
+                  Resolved
+                </button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t.resolve}
+                  className={cn(
+                    "size-7 text-muted-foreground opacity-0 transition-opacity group-hover/thread:opacity-100 hover:text-emerald-600 focus-visible:opacity-100",
+                    active && "opacity-100",
+                  )}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    actions.setResolved(thread.id, true);
+                  }}
+                >
+                  <CheckCircle2 />
+                </Button>
+              )}
             </TooltipTrigger>
             <TooltipContent>
               {thread.resolved ? t.reopen : t.resolve}
             </TooltipContent>
           </Tooltip>
-          <DeleteButton
-            title={t.deleteThreadConfirm}
-            className="size-7 shrink-0"
-            onDelete={() => {
-              actions.deleteThread(thread.id);
-              removeThreadMarks(editor, state, thread.id);
-            }}
-          />
+          <div
+            className={cn(
+              "flex opacity-0 transition-opacity group-hover/thread:opacity-100 focus-within:opacity-100",
+              active && !thread.resolved && "opacity-100",
+            )}
+          >
+            <DeleteButton
+              title={t.deleteThreadConfirm}
+              className="size-7 shrink-0"
+              onDelete={() => {
+                actions.deleteThread(thread.id);
+                removeThreadMarks(editor, state, thread.id);
+              }}
+            />
+          </div>
         </div>
       </div>
-      <div className="mt-3 flex flex-col gap-3">
+      <div className={cn("mt-3 flex flex-col gap-3", thread.resolved && "opacity-75")}>
         {shown.map((comment, index) => (
           <div key={comment.id} className="contents">
             {hidden > 0 && index === 1 ? (
               <button
                 type="button"
-                className="ms-8.5 self-start rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                className="ms-9.5 self-start rounded-sm text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 onClick={(event) => {
                   event.stopPropagation();
                   setExpanded(true);
@@ -825,6 +921,16 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
     [threads],
   );
 
+  // A thread picked in the document shows even when the filter hides it.
+  const activeResolved = threads.some(
+    (thread) => thread.resolved && activeIDs.includes(thread.id),
+  );
+  const [seenActiveResolved, setSeenActiveResolved] = useState(activeResolved);
+  if (activeResolved !== seenActiveResolved) {
+    setSeenActiveResolved(activeResolved);
+    if (activeResolved && filter === "open") setFilter("all");
+  }
+
   const visible = useMemo(() => {
     const positions = editor.read(() => $threadPositions());
     return threads
@@ -858,9 +964,9 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
   }, [editor, filter, search, sort, threads]);
 
   const filters = [
-    { value: "all" as const, label: "All", count: counts.total },
     { value: "open" as const, label: "Open", count: counts.open },
     { value: "resolved" as const, label: "Resolved", count: counts.resolved },
+    { value: "all" as const, label: "All", count: counts.total },
   ];
 
   let emptyTitle = t.noComments;
@@ -879,136 +985,118 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 shrink-0 items-center gap-1 ps-3.5 pe-2">
-        {searching ? (
-          <>
-            <div className="min-w-0 flex-1">
-              <Input
-                usage="search"
-                variant="minimal"
-                autoFocus
-                placeholder={t.searchComments}
-                aria-label={t.searchComments}
-                onSearchChange={setSearch}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    event.preventDefault();
-                    closeSearch();
-                  }
-                }}
-                className="h-7"
-              />
-            </div>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="size-6 shrink-0"
-              aria-label="Close search"
-              onClick={closeSearch}
-            >
-              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5" />
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="font-medium">{t.comments}</p>
-            {counts.total > 0 ? (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1.5 text-[10px] font-medium text-primary tabular-nums">
-                {counts.total}
-              </span>
-            ) : null}
-            <div className="ms-auto flex items-center gap-0.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="size-6 text-muted-foreground"
-                    aria-label={t.searchComments}
-                    onClick={() => setSearching(true)}
-                  >
-                    <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="size-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t.searchComments}</TooltipContent>
-              </Tooltip>
-              <DropdownMenu>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className={cn(
-                          "size-6 text-muted-foreground",
-                          sort !== "position" && "text-primary",
-                        )}
-                        aria-label="Sort comments"
-                      >
-                        <ArrowDownUp className="size-3.5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Sort</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="end" className="min-w-36">
-                  <DropdownMenuRadioGroup
-                    value={sort}
-                    onValueChange={(value) => setSort(value as CommentSort)}
-                  >
-                    <DropdownMenuRadioItem value="position">Position</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="recent-activity">Recent activity</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="oldest">Oldest</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+      {searching ? (
+        <div className="flex h-12 shrink-0 items-center gap-1 border-b bg-background ps-3 pe-2">
+          <div className="min-w-0 flex-1">
+            <Input
+              usage="search"
+              variant="minimal"
+              autoFocus
+              placeholder={t.searchComments}
+              aria-label={t.searchComments}
+              onSearchChange={setSearch}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  closeSearch();
+                }
+              }}
+              className="h-8"
+            />
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-7 shrink-0 text-muted-foreground"
+            aria-label="Close search"
+            onClick={closeSearch}
+          >
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
+          </Button>
+        </div>
+      ) : (
+        <SidePanelHeader title={t.comments} count={counts.total}>
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="size-6 text-muted-foreground"
-                aria-label="Close comments"
-                onClick={onClose}
+                className="size-7 text-muted-foreground"
+                aria-label={t.searchComments}
+                onClick={() => setSearching(true)}
               >
-                <X className="size-3.5" />
+                <HugeiconsIcon icon={Search01Icon} strokeWidth={2} className="size-4" />
               </Button>
-            </div>
-          </>
-        )}
-      </div>
-      <Tabs
+            </TooltipTrigger>
+            <TooltipContent>{t.searchComments}</TooltipContent>
+          </Tooltip>
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className={cn(
+                      "size-7 text-muted-foreground",
+                      sort !== "position" && "text-primary",
+                    )}
+                    aria-label="Sort comments"
+                  >
+                    <ArrowDownUp className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Sort</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="min-w-40">
+              <DropdownMenuRadioGroup
+                value={sort}
+                onValueChange={(value) => setSort(value as CommentSort)}
+              >
+                <DropdownMenuRadioItem value="position">Position in document</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="recent-activity">Recent activity</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-7 text-muted-foreground"
+            aria-label="Close comments"
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </Button>
+        </SidePanelHeader>
+      )}
+      <SidePanelFilter
+        label="Show comments"
         value={filter}
-        onValueChange={(value) => setFilter(value as CommentFilter)}
-        className="gap-0"
-      >
-        <TabsList className="h-8 w-full gap-0 px-1.5">
-          {filters.map(({ value, label, count }) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="h-8 min-w-0 flex-1 gap-1 px-2 py-0 text-sm"
-            >
-              {label}
-              {count > 0 ? (
-                <span className="tabular-nums text-muted-foreground">
-                  {count}
-                </span>
-              ) : null}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+        options={filters}
+        onChange={setFilter}
+      />
+      <div className="min-h-0 flex-1 overflow-y-auto bg-muted/30 px-3 py-3">
         {visible.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <p className="mb-1 font-medium">{emptyTitle}</p>
-            <p className="text-muted-foreground">{emptyDescription}</p>
-          </div>
+          <SidePanelEmpty
+            icon={<MessageSquareText />}
+            title={emptyTitle}
+            description={emptyDescription}
+            action={
+              search.trim()
+                ? { label: "Clear search", onClick: closeSearch }
+                : threads.length > 0 && filter !== "all"
+                  ? { label: "Show all comments", onClick: () => setFilter("all") }
+                  : undefined
+            }
+          />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {visible.map((thread) => (
               <ThreadCard
                 key={thread.id}
@@ -1025,6 +1113,39 @@ export function CommentsPanel({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Opens the comments panel when someone clicks commented text. The click puts
+ * the caret in the highlight, which makes its thread the active one.
+ */
+export function CommentHighlightClickPlugin({ onOpen }: { onOpen: () => void }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(
+    () =>
+      editor.registerRootListener((root) => {
+        if (!root) return;
+        const onClick = (event: MouseEvent) => {
+          const target = event.target;
+          if (!(target instanceof Element) || !target.closest("mark")) return;
+          // A drag that selects text (to comment on it, say) is not a pick.
+          if (window.getSelection()?.isCollapsed === false) return;
+          const commented = editor.read(() => {
+            for (let node = $getNearestNodeFromDOMNode(target); node; node = node.getParent()) {
+              if ($isMarkNode(node)) return node.getIDs().length > 0;
+            }
+            return false;
+          });
+          if (commented) onOpen();
+        };
+        root.addEventListener("click", onClick);
+        return () => root.removeEventListener("click", onClick);
+      }),
+    [editor, onOpen],
+  );
+
+  return null;
 }
 
 /** Time of the newest comment by someone else in an open thread (0 for none). */

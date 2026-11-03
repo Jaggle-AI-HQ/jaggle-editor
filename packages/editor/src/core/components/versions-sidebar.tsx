@@ -4,9 +4,15 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { FilterHorizontalIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { History, MoreHorizontal, Pencil, Plus, RotateCcw, X } from "lucide-react";
+import {
+  ChevronRight,
+  History,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  RotateCcw,
+  X,
+} from "lucide-react";
 
 import { EDITOR_QUERY_KEY, useEditorAdapters } from "../../adapters/context";
 import { Loader } from "../../ui/loader";
@@ -31,24 +37,19 @@ import {
 } from "../../ui/dialog";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../../ui/tooltip";
 import { cn } from "../../lib/utils";
 
 import { DOCUMENT_LAYOUT } from "../document/layout";
 import type { DocumentSource } from "../lib/types";
 
 import { HtmlView } from "./html-view";
+import { SidePanelEmpty, SidePanelFilter, SidePanelHeader } from "./side-panel";
 
 export type PreviewVersion = {
   id: string;
@@ -259,81 +260,216 @@ function TimelineDot({ variant }: { variant: "current" | "manual" | "auto" }) {
     <span
       aria-hidden="true"
       className={cn(
-        "absolute start-[5px] top-[13px] z-10 size-2.5 rounded-full border-2 bg-background",
-        variant === "current" && "border-primary bg-primary",
+        "absolute start-[5px] top-[15px] z-10 size-2.5 rounded-full border-2 bg-background",
+        variant === "current" && "border-primary bg-primary ring-4 ring-primary/15",
         variant === "manual" && "border-primary",
-        variant === "auto" && "border-muted-foreground/40",
+        variant === "auto" && "start-[6px] top-[16px] size-2 border-muted-foreground/40",
       )}
     />
+  );
+}
+
+/** "Sangay Wangchuk", or "Ana, Bo +2" when several people saved. */
+export function authorsLabel(versions: PreviewVersion[]) {
+  const names = [...new Set(versions.map((version) => version.author).filter(Boolean))];
+  if (names.length <= 2) return names.join(", ");
+  return `${names.slice(0, 2).join(", ")} +${names.length - 2}`;
+}
+
+function VersionActions({
+  version,
+  onRename,
+  onRestore,
+}: {
+  version: PreviewVersion;
+  onRename: () => void;
+  onRestore: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="size-7 shrink-0 text-muted-foreground opacity-0 group-hover/version:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+          aria-label={`Actions for ${version.name}`}
+        >
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={onRename}>
+          <Pencil />
+          {version.auto ? "Name this version" : "Rename"}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={onRestore}>
+          <RotateCcw />
+          Restore
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 function VersionRow({
   version,
   selected,
+  nested = false,
   onSelect,
   onRename,
   onRestore,
 }: {
   version: PreviewVersion;
   selected: boolean;
+  /** Inside an autosave group: one line, no dot. */
+  nested?: boolean;
   onSelect: () => void;
   onRename: () => void;
   onRestore: () => void;
 }) {
+  const when = timeOfDay(version.createdAt);
   return (
-    <li className="group relative">
-      <TimelineDot variant={version.auto ? "auto" : "manual"} />
+    <li className="group/version relative">
+      {nested ? null : <TimelineDot variant={version.auto ? "auto" : "manual"} />}
       <div
         className={cn(
-          "ms-5 flex items-center gap-1 rounded-md pe-1 transition-colors hover:bg-muted/60",
-          selected && "bg-accent hover:bg-accent",
+          "ms-5 flex items-center gap-1 rounded-lg pe-1 transition-colors hover:bg-muted/70",
+          nested && "ms-8",
+          selected && "bg-muted hover:bg-muted",
         )}
       >
         <button
           type="button"
           aria-current={selected ? "true" : undefined}
-          className="min-w-0 flex-1 rounded-md px-2 py-1.5 text-start outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+          className={cn(
+            "min-w-0 flex-1 rounded-lg px-2 text-start outline-none focus-visible:ring-2 focus-visible:ring-primary/20",
+            nested ? "py-1" : "py-1.5",
+          )}
           onClick={onSelect}
         >
-          <span className="flex min-w-0 items-center gap-2">
-            <span className={cn("truncate", version.auto ? "text-muted-foreground" : "font-medium")}>
-              {version.name}
+          {nested ? (
+            <span className="flex min-w-0 items-baseline gap-2">
+              <span className={cn("shrink-0 text-sm tabular-nums", selected && "font-medium")}>
+                {when}
+              </span>
+              {version.author ? (
+                <span className="truncate text-xs text-muted-foreground">{version.author}</span>
+              ) : null}
             </span>
-          </span>
-          <span className="block text-sm text-muted-foreground">
-            {version.author
-              ? `${version.author} · ${timeOfDay(version.createdAt)}`
-              : timeOfDay(version.createdAt)}
-          </span>
+          ) : (
+            <>
+              <span
+                className={cn(
+                  "block truncate text-sm",
+                  version.auto ? "text-muted-foreground" : "font-medium",
+                  selected && "text-foreground",
+                )}
+              >
+                {version.name}
+              </span>
+              <span className="block truncate text-xs text-muted-foreground">
+                {version.author ? `${when} · ${version.author}` : when}
+              </span>
+            </>
+          )}
         </button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="size-7 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
-              aria-label={`Actions for ${version.name}`}
-            >
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onRename}>
-              <Pencil />
-              Rename
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onRestore}>
-              <RotateCcw />
-              Restore
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <VersionActions version={version} onRename={onRename} onRestore={onRestore} />
       </div>
     </li>
   );
 }
+
+/** Autosaves in a row, folded into one entry that opens to list them. */
+function AutosaveGroup({
+  versions,
+  previewId,
+  onPreview,
+  onRename,
+  onRestore,
+}: {
+  versions: PreviewVersion[];
+  previewId: string | null;
+  onPreview: (id: string) => void;
+  onRename: (version: PreviewVersion) => void;
+  onRestore: (version: PreviewVersion) => void;
+}) {
+  const holdsPreview = versions.some((version) => version.id === previewId);
+  const [open, setOpen] = useState(holdsPreview);
+  const newest = versions[0];
+  const oldest = versions[versions.length - 1];
+  const span =
+    timeOfDay(oldest.createdAt) === timeOfDay(newest.createdAt)
+      ? timeOfDay(newest.createdAt)
+      : `${timeOfDay(oldest.createdAt)} – ${timeOfDay(newest.createdAt)}`;
+  const authors = authorsLabel(versions);
+  const expanded = open || holdsPreview;
+
+  return (
+    <li className="relative">
+      <TimelineDot variant="auto" />
+      <button
+        type="button"
+        aria-expanded={expanded}
+        className="ms-5 flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-lg px-2 py-1.5 text-start transition-colors outline-none hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-primary/20"
+        onClick={() => setOpen(!expanded)}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm text-muted-foreground">
+            {versions.length} autosaves
+          </span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {authors ? `${span} · ${authors}` : span}
+          </span>
+        </span>
+        <ChevronRight
+          aria-hidden="true"
+          className={cn(
+            "size-4 shrink-0 text-muted-foreground transition-transform rtl:rotate-180",
+            expanded && "rotate-90 rtl:rotate-90",
+          )}
+        />
+      </button>
+      {expanded ? (
+        <ul className="mt-0.5 space-y-px">
+          {versions.map((version) => (
+            <VersionRow
+              key={version.id}
+              version={version}
+              nested
+              selected={previewId === version.id}
+              onSelect={() => onPreview(version.id)}
+              onRename={() => onRename(version)}
+              onRestore={() => onRestore(version)}
+            />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
+
+export type VersionEntry =
+  | { type: "version"; version: PreviewVersion }
+  | { type: "autosaves"; versions: PreviewVersion[] };
+
+/** A day's versions, with autosaves in a row folded together. */
+export function dayEntries(versions: PreviewVersion[]): VersionEntry[] {
+  const entries: VersionEntry[] = [];
+  for (const version of versions) {
+    const last = entries.at(-1);
+    if (version.auto && last?.type === "autosaves") {
+      last.versions.push(version);
+    } else if (version.auto) {
+      entries.push({ type: "autosaves", versions: [version] });
+    } else {
+      entries.push({ type: "version", version });
+    }
+  }
+  return entries;
+}
+
+type VersionFilter = "all" | "named";
 
 /**
  * Version history: a timeline grouped by day, newest first, under "Current
@@ -357,14 +493,17 @@ export function VersionsSidebar({
   onRequestRestore: (version: PreviewVersion) => void;
   onClose: () => void;
 }) {
-  const [showAutosaves, setShowAutosaves] = useState(true);
+  const [filter, setFilter] = useState<VersionFilter>("all");
   const [naming, setNaming] = useState<{
     mode: "create" | "rename";
     id?: string;
     name: string;
+    /** Naming an autosave rather than renaming a named version. */
+    auto?: boolean;
   } | null>(null);
+  const namedCount = versions.filter((version) => !version.auto).length;
   const visible = versions
-    .filter((version) => showAutosaves || !version.auto)
+    .filter((version) => filter === "all" || !version.auto)
     .toSorted((a, b) => b.createdAt - a.createdAt);
   const groups: { label: string; versions: PreviewVersion[] }[] = [];
   for (const version of visible) {
@@ -376,7 +515,7 @@ export function VersionsSidebar({
       groups.push({ label, versions: [version] });
     }
   }
-  const nextNumber = versions.filter((version) => !version.auto).length + 1;
+  const nextNumber = namedCount + 1;
 
   const submitName = () => {
     if (!naming?.name.trim()) return;
@@ -387,71 +526,57 @@ export function VersionsSidebar({
     }
     setNaming(null);
   };
+  const rename = (version: PreviewVersion) =>
+    setNaming({
+      mode: "rename",
+      id: version.id,
+      name: version.auto ? `Version #${nextNumber}` : version.name,
+      auto: version.auto,
+    });
 
   return (
     <aside className={DOCUMENT_LAYOUT.sidePanel} aria-label="Version history">
-      <div className="flex h-10 shrink-0 items-center gap-1 border-b ps-3.5 pe-2">
-        <p className="font-medium">Version history</p>
-        <div className="ms-auto flex items-center gap-0.5">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="h-6 gap-1 px-1.5 text-muted-foreground"
-            onClick={() => setNaming({ mode: "create", name: `Version #${nextNumber}` })}
-          >
-            <Plus className="size-3.5" />
-            Save
-          </Button>
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className={cn(
-                      "size-6 text-muted-foreground",
-                      !showAutosaves && "text-primary",
-                    )}
-                    aria-label="Filter versions"
-                  >
-                    <HugeiconsIcon
-                      icon={FilterHorizontalIcon}
-                      strokeWidth={2}
-                      className="size-3.5"
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Filter</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end" className="min-w-40">
-              <DropdownMenuCheckboxItem
-                checked={showAutosaves}
-                onCheckedChange={setShowAutosaves}
-              >
-                Show autosaves
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="size-6 text-muted-foreground"
-            aria-label="Close version history"
-            onClick={onClose}
-          >
-            <X className="size-3.5" />
-          </Button>
-        </div>
-      </div>
+      <SidePanelHeader title="Version history">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="me-1 h-7 gap-1 px-2 text-xs"
+          onClick={() => setNaming({ mode: "create", name: `Version #${nextNumber}` })}
+        >
+          <Plus className="size-3.5" />
+          Save version
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="size-7 text-muted-foreground"
+          aria-label="Close version history"
+          onClick={onClose}
+        >
+          <X className="size-4" />
+        </Button>
+      </SidePanelHeader>
+      <SidePanelFilter
+        label="Show versions"
+        value={filter}
+        options={[
+          { value: "all", label: "All versions", count: versions.length },
+          { value: "named", label: "Named", count: namedCount },
+        ]}
+        onChange={(next) => {
+          setFilter(next);
+          // An autosave being previewed leaves the list, so the preview ends too.
+          if (next === "named" && versions.some((version) => version.id === previewId && version.auto)) {
+            onPreview(null);
+          }
+        }}
+      />
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         {/* The timeline line runs behind the dots. */}
-        <div className="relative before:absolute before:start-[9px] before:top-4 before:bottom-4 before:w-px before:bg-border">
+        <div className="relative pt-2 before:absolute before:start-[9px] before:top-5 before:bottom-4 before:w-px before:bg-border">
           <ul>
             <li className="relative">
               <TimelineDot variant="current" />
@@ -459,44 +584,73 @@ export function VersionsSidebar({
                 type="button"
                 aria-current={previewId === null ? "true" : undefined}
                 className={cn(
-                  "ms-5 block w-[calc(100%-1.25rem)] rounded-md px-2 py-1.5 text-start transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-primary/20",
-                  previewId === null && "bg-accent hover:bg-accent",
+                  "ms-5 block w-[calc(100%-1.25rem)] rounded-lg px-2 py-1.5 text-start transition-colors outline-none hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-primary/20",
+                  previewId === null && "bg-muted hover:bg-muted",
                 )}
                 onClick={() => onPreview(null)}
               >
-                <span className="block font-medium">Current version</span>
-                <span className="block text-sm text-muted-foreground">Live document</span>
+                <span className="block text-sm font-medium">
+                  Current version
+                </span>
+                <span className="block text-xs text-muted-foreground">Live document</span>
               </button>
             </li>
           </ul>
           {groups.map((group) => (
             <section key={group.label} aria-label={group.label}>
-              <p className="ms-7 mt-3 mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              <p className="sticky top-0 z-20 ms-7 mt-2 bg-background/95 py-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase backdrop-blur-sm">
                 {group.label}
               </p>
               <ul className="space-y-0.5">
-                {group.versions.map((version) => (
-                  <VersionRow
-                    key={version.id}
-                    version={version}
-                    selected={previewId === version.id}
-                    onSelect={() => onPreview(version.id)}
-                    onRename={() =>
-                      setNaming({ mode: "rename", id: version.id, name: version.name })
-                    }
-                    onRestore={() => onRequestRestore(version)}
-                  />
-                ))}
+                {dayEntries(group.versions).map((entry) =>
+                  entry.type === "version" || entry.versions.length === 1 ? (
+                    <VersionRow
+                      key={entry.type === "version" ? entry.version.id : entry.versions[0].id}
+                      version={entry.type === "version" ? entry.version : entry.versions[0]}
+                      selected={
+                        previewId ===
+                        (entry.type === "version" ? entry.version.id : entry.versions[0].id)
+                      }
+                      onSelect={() =>
+                        onPreview(entry.type === "version" ? entry.version.id : entry.versions[0].id)
+                      }
+                      onRename={() =>
+                        rename(entry.type === "version" ? entry.version : entry.versions[0])
+                      }
+                      onRestore={() =>
+                        onRequestRestore(entry.type === "version" ? entry.version : entry.versions[0])
+                      }
+                    />
+                  ) : (
+                    <AutosaveGroup
+                      key={entry.versions[0].id}
+                      versions={entry.versions}
+                      previewId={previewId}
+                      onPreview={onPreview}
+                      onRename={rename}
+                      onRestore={onRequestRestore}
+                    />
+                  ),
+                )}
               </ul>
             </section>
           ))}
         </div>
         {visible.length === 0 ? (
-          <p className="px-6 py-10 text-center text-muted-foreground">
-            {versions.length > 0
-              ? "No saved versions. Show autosaves from the filter menu to see automatic snapshots."
-              : "Save a version to start tracking changes."}
-          </p>
+          <SidePanelEmpty
+            icon={<History />}
+            title={versions.length > 0 ? "No named versions" : "No versions yet"}
+            description={
+              versions.length > 0
+                ? "Name a version to find it here, or switch to All versions to see autosaves."
+                : "Save a version to start tracking changes."
+            }
+            action={
+              versions.length > 0
+                ? { label: "Show all versions", onClick: () => setFilter("all") }
+                : undefined
+            }
+          />
         ) : null}
       </div>
 
@@ -504,10 +658,14 @@ export function VersionsSidebar({
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {naming?.mode === "rename" ? "Rename version" : "Save version"}
+              {naming?.mode !== "rename"
+                ? "Save version"
+                : naming.auto
+                  ? "Name version"
+                  : "Rename version"}
             </DialogTitle>
             <DialogDescription>
-              {naming?.mode === "rename"
+              {naming?.mode === "rename" && !naming.auto
                 ? "Enter a new name for this version."
                 : "Give this version a name to find it later."}
             </DialogDescription>
@@ -532,7 +690,7 @@ export function VersionsSidebar({
               Cancel
             </Button>
             <Button type="button" disabled={!naming?.name.trim()} onClick={submitName}>
-              {naming?.mode === "rename" ? "Rename" : "Save"}
+              {naming?.mode === "rename" && !naming.auto ? "Rename" : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

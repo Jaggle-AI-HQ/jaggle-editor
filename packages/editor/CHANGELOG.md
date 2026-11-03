@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.0
+
+- Fixed: the slash menu, and the mention menu where it stays in the editor, were squeezed to a few rows in a short
+  document, because they were kept inside the editor's own box. They now stay within the editor's visible area: as
+  tall as the part of the screen the document shows in (below the sticky header), and as wide as the editor.
+- Clicking commented text opens the comments panel on its thread, which scrolls into view. A resolved thread picked
+  this way switches the panel from Open to All.
+- The comments and version history panels are redone and share one set of pieces (`components/side-panel.tsx`):
+  - The panel is framed: a border on every side, rounded, inset 0.5rem from the editor's edge, sliding in when
+    opened.
+  - A title row with a count, and a segmented filter under it (comments: Open, Resolved, All; versions: All versions,
+    Named, replacing the "Show autosaves" menu).
+  - Empty states with an icon, and a button out of the filter or search that hides everything.
+- Comment threads:
+  - Cards on a tinted list. The picked thread gets a firmer neutral edge and its quote takes the highlight's amber.
+  - Hovering a card lights up its text in the document (`.lexical-mark.hovered` in `styles.css`).
+  - A resolved thread shows a Resolved pill, which reopens it.
+  - Reactions take no room until a comment has one; the add-reaction button joins the comment's hover actions.
+- Version history:
+  - Autosaves in a row fold into one entry ("11 autosaves", the time span and who saved), which opens to one line
+    per autosave. Named versions stand alone.
+  - An autosave can be named from its menu ("Name this version").
+  - Choosing Named while previewing an autosave goes back to the current version.
+
 ## 0.2.2
 
 - Fixed: code blocks kept the colours of the mode they were highlighted in, because the Shiki theme and colours are

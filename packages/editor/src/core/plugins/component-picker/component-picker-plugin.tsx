@@ -38,7 +38,7 @@ import {
 } from "../../../ui/popover";
 
 import { useTranslation, type Locale } from "../../lib/locale";
-import { useFloatingCollisionBoundary } from "../floating/floating-utils";
+import { editorMenuPadding } from "../floating/floating-utils";
 
 const GROUPS = [
   "suggested",
@@ -164,7 +164,6 @@ class ComponentPickerOption extends MenuOption {
 export function ComponentPicker({ children }: { children: React.ReactNode }) {
   const [editor] = useLexicalComposerContext();
   const { dir, t } = useTranslation();
-  const collisionBoundary = useFloatingCollisionBoundary(editor);
   const [queryString, setQueryString] = useState<string | null>(null);
   const [itemsById, setItemsById] = useState(
     () => new Map<string, { order: number; items: ComponentPickerItem[] }>(),
@@ -321,8 +320,7 @@ export function ComponentPicker({ children }: { children: React.ReactNode }) {
                 side="bottom"
                 align="start"
                 sideOffset={6}
-                collisionPadding={8}
-                collisionBoundary={collisionBoundary ?? undefined}
+                collisionPadding={editorMenuPadding(editor.getRootElement())}
                 sticky="partial"
                 onOpenAutoFocus={(event) => event.preventDefault()}
                 onCloseAutoFocus={(event) => event.preventDefault()}

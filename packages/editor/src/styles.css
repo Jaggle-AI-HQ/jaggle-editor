@@ -95,6 +95,12 @@ p[data-lexical-active-placeholder]::before {
   border-bottom-color: rgb(245 158 11);
 }
 
+/* Its thread's card is hovered in the comments panel. */
+.lexical-mark.hovered {
+  background-color: rgb(251 191 36 / 0.4);
+  border-bottom-color: rgb(245 158 11);
+}
+
 .lexical-mark-overlap {
   background-color: rgb(251 191 36 / 0.35);
 }

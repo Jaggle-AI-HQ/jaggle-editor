@@ -130,6 +130,27 @@ export function revealInEditor(rootElement: HTMLElement, target: HTMLElement) {
   }
 }
 
+/**
+ * Collision padding (used without a collision boundary) that keeps a menu in
+ * the editor's visible area: as tall as the part of the screen the content
+ * shows in, below the sticky header, and as wide as the editor. A boundary on
+ * the editor's own box would squeeze the slash menu to a few lines in a short
+ * document.
+ */
+export function editorMenuPadding(rootElement: HTMLElement | null, gap = 8) {
+  if (!rootElement) {
+    return gap;
+  }
+  const { top, bottom } = getEditorVisibleArea(rootElement);
+  const box = (rootElement.parentElement ?? rootElement).getBoundingClientRect();
+  return {
+    top: Math.max(0, top) + gap,
+    bottom: Math.max(0, window.innerHeight - bottom) + gap,
+    left: Math.max(0, box.left) + gap,
+    right: Math.max(0, window.innerWidth - box.right) + gap,
+  };
+}
+
 export function useFloatingCollisionBoundary(editor: LexicalEditor) {
   const [boundary, setBoundary] = useState<HTMLElement | null>(null);
 

@@ -21,12 +21,13 @@ export const DOCUMENT_LAYOUT = {
   /** Keeps the first line of a non-page editor clear of the corner actions. */
   cornerActionsSpace: "pt-8",
   /**
-   * Comments and versions panels: stick under the header and fill the visible
-   * height (variables set by `useStickyPanelStyle`), whether the editor or the
-   * page scrolls.
+   * Comments and versions panels: a framed panel beside the document, inset
+   * by 0.5rem, that sticks under the header and fills the visible height
+   * (variables set by `useStickyPanelStyle`), whether the editor or the page
+   * scrolls. It slides in when opened.
    */
   sidePanel:
-    "sticky top-[var(--document-header-height,0px)] flex h-[var(--document-panel-height,100%)] w-80 shrink-0 flex-col self-start border-s bg-background",
+    "sticky top-[calc(var(--document-header-height,0px)+0.5rem)] my-2 me-2 flex h-[calc(var(--document-panel-height,100%)-1rem)] w-80 shrink-0 flex-col self-start overflow-hidden rounded-xl border bg-background animate-in fade-in-0 slide-in-from-right-4 duration-200 motion-reduce:animate-none",
   /** The writing surface's inset (the draggable ContentEditable variant). */
   contentInset: "px-12 py-4",
 } as const;
