@@ -233,6 +233,7 @@ function DocumentWorkspace({
   onChange,
   source,
   onSaveStatusChange,
+  onPresenceChange,
   onReady,
   shell,
 }: LexicalEditorProps & { shell: DocumentShell }) {
@@ -469,6 +470,7 @@ function DocumentWorkspace({
               seed={runtime.loaded.seed}
               user={runtime.user}
               providerRef={runtime.providerRef}
+              onPresenceChange={onPresenceChange}
               onReady={() => {
                 // Past the import of saved HTML, which the room does on sync.
                 setTimeout(() => setReady(true), 500);

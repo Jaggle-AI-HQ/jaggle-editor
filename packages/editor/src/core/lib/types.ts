@@ -72,6 +72,21 @@ export type DocumentSource = {
 
 export type DocumentSaveStatus = "idle" | "saving" | "saved" | "error";
 
+/**
+ * Someone else in a document's live room, as their editor announces itself
+ * (the name and colour on their cursor). One entry per person, however many
+ * tabs they have open.
+ */
+export type DocumentPresencePerson = {
+  /** The app's ID for them (`currentUser.id` in their editor). */
+  id: string;
+  name: string;
+  color: string;
+  avatarUrl?: string | null;
+  /** Their caret is in the document now. */
+  focusing: boolean;
+};
+
 /** Imperative access for the page, from `onReady`. */
 export type DocumentHandle = {
   /** Replaces the whole document (AI generation streams through this). */
@@ -127,6 +142,11 @@ export type LexicalEditorProps = {
   mentionScope?: MentionScope;
   /** Document mode with a source: save progress, for a "Saving…/Saved" label. */
   onSaveStatusChange?: (status: DocumentSaveStatus) => void;
+  /**
+   * Document mode with a live room: who else is in it, whenever that changes
+   * (an empty list when the editor goes away).
+   */
+  onPresenceChange?: (people: DocumentPresencePerson[]) => void;
   /** Document mode: called once the editor is ready, with imperative access. */
   onReady?: (handle: DocumentHandle) => void;
   containerClassName?: string;

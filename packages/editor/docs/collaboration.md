@@ -80,6 +80,18 @@ Remote cursors and selections show each person's `currentUser`:
 | `color` | Their cursor colour. When unset, one is picked from their `id`, so it's the same everywhere. |
 | `avatarUrl` | Sent with their presence |
 
+**`onPresenceChange(people)`** on the editor reports who else is in the room, for avatars beside the title (the
+editor draws none itself). It is called whenever someone joins, leaves or moves their caret, and with `[]` when the
+editor goes away. Each entry is `{ id, name, color, avatarUrl, focusing }`, one per person: several tabs of theirs
+count once, and the person's own other tabs are left out. It comes from each editor's announcement, so treat it as
+presence, not access.
+
+```tsx
+const [people, setPeople] = useState<DocumentPresencePerson[]>([]);
+
+<LexicalEditor mode="document" source={source} onPresenceChange={setPeople} />
+```
+
 ## Authorising sockets
 
 `collaboration.webSocketFor(room)` returns the WebSocket class to use for one room (y-websocket's

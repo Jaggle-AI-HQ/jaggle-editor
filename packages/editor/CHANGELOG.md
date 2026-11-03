@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- `onPresenceChange(people)` on the document editor reports who else is in the live room (`DocumentPresencePerson`:
+  `id`, `name`, `color`, `avatarUrl`, `focusing`), one entry per person, from the room's awareness. Apps draw the
+  avatars; Jaggle Office shows them beside Share in pageless documents.
+
 ## 0.3.0
 
 - Fixed: the slash menu, and the mention menu where it stays in the editor, were squeezed to a few rows in a short

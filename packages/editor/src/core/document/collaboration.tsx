@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CollaborationPlugin } from "@lexical/react/LexicalCollaborationPlugin";
-import type { Provider } from "@lexical/yjs";
+import type { Provider, UserState } from "@lexical/yjs";
 import type { LexicalEditor } from "lexical";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
@@ -12,6 +12,7 @@ import { useEditorAdapters } from "../../adapters/context";
 import type { CollaborationAdapter, DocumentIdentity } from "../../adapters/types";
 
 import { $replaceWithHtml } from "../lib/transfer";
+import type { DocumentPresencePerson } from "../lib/types";
 
 import { decodeDocState } from "./yjs-binding";
 
@@ -172,6 +173,33 @@ function liveServer(
   };
 }
 
+/**
+ * The other people in a room, from its awareness states: one per person
+ * (another tab of theirs, or of yours, counts once), in the order the states
+ * list them. A state without a name or the app's ID is skipped.
+ */
+export function presenceFrom(
+  states: Map<number, Partial<UserState> & { awarenessData?: { id?: unknown; avatarUrl?: unknown } }>,
+  ownClientId: number,
+  ownUserId: string,
+): DocumentPresencePerson[] {
+  const people = new Map<string, DocumentPresencePerson>();
+  for (const [clientId, state] of states) {
+    const id = typeof state.awarenessData?.id === "string" ? state.awarenessData.id : "";
+    if (clientId === ownClientId || !id || id === ownUserId || !state.name) continue;
+    const existing = people.get(id);
+    const avatarUrl = state.awarenessData?.avatarUrl;
+    people.set(id, {
+      id,
+      name: state.name,
+      color: state.color ?? "",
+      avatarUrl: typeof avatarUrl === "string" ? avatarUrl : null,
+      focusing: Boolean(existing?.focusing || state.focusing),
+    });
+  }
+  return [...people.values()];
+}
+
 export function DocumentCollaboration({
   doc,
   identity,
@@ -181,6 +209,7 @@ export function DocumentCollaboration({
   user,
   providerRef,
   onReady,
+  onPresenceChange,
 }: {
   doc: Y.Doc;
   /** The document, for authorising its room. */
@@ -193,9 +222,17 @@ export function DocumentCollaboration({
   /** Receives the provider, for saving (remote updates) and presence. */
   providerRef: { current: DocumentProvider | null };
   onReady: () => void;
+  /** Who else is in the room, on every awareness change. */
+  onPresenceChange?: (people: DocumentPresencePerson[]) => void;
 }) {
   const { collaboration } = useEditorAdapters();
   const onReadyRef = useRef(onReady);
+  const onPresenceRef = useRef(onPresenceChange);
+  const userIdRef = useRef(user.id);
+  useEffect(() => {
+    onPresenceRef.current = onPresenceChange;
+    userIdRef.current = user.id;
+  }, [onPresenceChange, user.id]);
   // The seed, server and document are read once, when the room is first joined.
   const seedRef = useRef(seed);
   const joinRef = useRef({ collaboration, identity });
@@ -215,6 +252,14 @@ export function DocumentCollaboration({
         liveServer(collaboration, identity, room),
       );
       provider.onReady = () => onReadyRef.current();
+      // Presence: the room's awareness, which the plugin fills with each
+      // editor's name, colour and `awarenessData`.
+      const awareness = provider.ws.awareness;
+      awareness.on("change", () => {
+        onPresenceRef.current?.(
+          presenceFrom(awareness.getStates() as Map<number, Partial<UserState>>, awareness.clientID, userIdRef.current),
+        );
+      });
       providerRef.current = provider;
       return provider as unknown as Provider;
     },
@@ -235,6 +280,7 @@ export function DocumentCollaboration({
         if (mountedRef.current || !provider) return;
         provider.destroy();
         if (providerRef.current === provider) providerRef.current = null;
+        onPresenceRef.current?.([]);
       });
     };
   }, [providerRef]);

@@ -127,6 +127,7 @@ export type {
   DocumentChangeHandler,
   DocumentHandle,
   DocumentHeader,
+  DocumentPresencePerson,
   DocumentSaveStatus,
   DocumentSource,
   ImageUploadScope,
