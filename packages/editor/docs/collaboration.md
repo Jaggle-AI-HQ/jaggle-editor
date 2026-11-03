@@ -92,6 +92,10 @@ const [people, setPeople] = useState<DocumentPresencePerson[]>([]);
 <LexicalEditor mode="document" source={source} onPresenceChange={setPeople} />
 ```
 
+To take someone to a person's cursor when they click an avatar, call `revealPerson(person.id)` on the
+[`DocumentHandle`](document-editor.md#imperative-access-onready). It returns `false` when that person has no
+cursor in the document right now (another tab has their focus), so the app can say so.
+
 ## Authorising sockets
 
 `collaboration.webSocketFor(room)` returns the WebSocket class to use for one room (y-websocket's

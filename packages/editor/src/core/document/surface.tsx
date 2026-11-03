@@ -4,6 +4,7 @@ import {
   type Dispatch,
   type SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -23,7 +24,12 @@ import { AiMenu } from "../components/ai-menu";
 import { CommentsSidebar } from "../components/comments-sidebar";
 import { ImportDialog } from "../components/import-dialog";
 import { IncompleteDocumentNotice } from "../components/incomplete-document-notice";
-import { EXPORT_FORMATS, ShellActions } from "../components/shell-actions";
+import {
+  EXPORT_FORMATS,
+  matchesPanelShortcut,
+  PANEL_SHORTCUTS,
+  ShellActions,
+} from "../components/shell-actions";
 import {
   type PreviewVersion,
   RestoreVersionDialog,
@@ -334,6 +340,22 @@ function DocumentWorkspace({
     panel === "versions",
   );
   const openComments = useCallback(() => setPanel("comments"), [setPanel]);
+  // ⌘⌥⇧H and ⌘⌥⇧A toggle the panels wherever focus is on the page.
+  useEffect(() => {
+    if (!showComments && !showVersionHistory) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (showVersionHistory && matchesPanelShortcut(event, PANEL_SHORTCUTS.versions)) {
+        event.preventDefault();
+        setPreviewId(null);
+        setPanel((current) => (current === "versions" ? null : "versions"));
+      } else if (showComments && matchesPanelShortcut(event, PANEL_SHORTCUTS.comments)) {
+        event.preventDefault();
+        setPanel((current) => (current === "comments" ? null : "comments"));
+      }
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [setPanel, showComments, showVersionHistory]);
   const hasActions =
     showComments || showVersionHistory || showImport || showExport;
   const hasHeader =
@@ -492,6 +514,7 @@ function DocumentWorkspace({
             ready={ready}
             onReady={onReady}
             persistenceRef={runtime?.persistenceRef ?? EMPTY_PERSISTENCE}
+            providerRef={runtime?.providerRef ?? NO_PROVIDER}
           />
         ) : null}
         {aiAnchor && ai ? (
@@ -517,6 +540,7 @@ function DocumentWorkspace({
 }
 
 const EMPTY_PERSISTENCE = { current: null };
+const NO_PROVIDER = { current: null };
 
 /** One live editing session: a Y.Doc for one revision of the document. */
 type DocumentSession = Pick<DocumentRuntime, "doc" | "providerRef" | "persistenceRef"> & {

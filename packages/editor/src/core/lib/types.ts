@@ -98,6 +98,11 @@ export type DocumentHandle = {
   restore: (state: SerializedEditorState) => void;
   /** Saves pending changes now. */
   flush: () => Promise<void>;
+  /**
+   * Scrolls to someone's cursor in the live room (an `id` from
+   * `onPresenceChange`). False when they have no cursor in the document now.
+   */
+  revealPerson: (id: string) => boolean;
 };
 
 export type LexicalEditorProps = {

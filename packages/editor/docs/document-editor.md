@@ -192,6 +192,10 @@ no prop for it.
 
 Without a header, the editor's actions sit in the editor's top corner.
 
+The editor's actions are version history, comments and ⋯, in that order. Version history toggles with ⌘⌥⇧H and
+comments with ⌘⌥⇧A (Ctrl+Alt+Shift elsewhere), wherever focus is on the page; the tooltips show the keys. Below
+768px the two buttons fold into the ⋯ menu.
+
 Slot content renders inside the editor, so it can call `useDocumentUi()` to drive the editor:
 
 ```tsx
@@ -252,6 +256,7 @@ function GeneratedDocument({ source }: { source: DocumentSource }) {
 | `getMarkdown()`, `getHtml()` | The current content |
 | `snapshot()`, `restore(state)` | Takes the current content as Lexical JSON, and puts it back |
 | `flush()` | Saves pending changes now (saved documents); resolves when the save returns |
+| `revealPerson(id)` | Scrolls to someone's cursor in the live room (an `id` from `onPresenceChange`). `false` when they have no cursor in the document now. |
 
 ## Comments
 

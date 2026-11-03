@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- The editor's header actions are in one order: version history, then comments, then ⋯. Their tooltips show
+  their shortcuts, which now work anywhere on the page while the editor is open: ⌘⌥⇧H (Ctrl+Alt+Shift+H elsewhere)
+  toggles version history and ⌘⌥⇧A toggles comments, as in Google Docs.
+- Below tablet width (768px) the history and comments buttons fold into the ⋯ menu, with their shortcuts, so the
+  title keeps its room. The ⋯ button carries the unread dot while comments are folded into it.
+- `DocumentHandle.revealPerson(id)` scrolls to someone's cursor in the live room (an `id` from `onPresenceChange`),
+  for apps whose avatars take you to the person. It returns `false` when they have no cursor in the document now.
+
 ## 0.4.0
 
 - `onPresenceChange(people)` on the document editor reports who else is in the live room (`DocumentPresencePerson`:

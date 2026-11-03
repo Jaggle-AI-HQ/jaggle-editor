@@ -2,6 +2,9 @@
 
 import type { ReactNode } from "react";
 
+import { formatKeyboardShortcut } from "@lexical/extension";
+import { CONTROL_OR_META, IS_APPLE, type KeyboardShortcutMatch } from "lexical";
+
 import {
   Doc01Icon,
   HtmlFile01Icon,
@@ -58,10 +61,42 @@ export function useExportFormats() {
     : EXPORT_FORMATS.filter(({ format }) => format === "html" || format === "markdown");
 }
 
+/**
+ * The panels' shortcuts, as Google Docs (and Jaggle Office's other editors)
+ * have them: ⌘⌥⇧H version history, ⌘⌥⇧A comments (Ctrl+Alt+Shift elsewhere).
+ */
+const PANEL_MODIFIERS = { ...CONTROL_OR_META, altKey: true, shiftKey: true };
+export const PANEL_SHORTCUTS: Readonly<Record<"versions" | "comments", KeyboardShortcutMatch>> =
+  Object.freeze({
+    versions: { key: "h", modifiers: PANEL_MODIFIERS },
+    comments: { key: "a", modifiers: PANEL_MODIFIERS },
+  });
+
+/**
+ * Whether a key press is a panel shortcut. Matched on `code`: with Alt held a
+ * Mac types another character for the key.
+ */
+export function matchesPanelShortcut(
+  event: Pick<KeyboardEvent, "code" | "metaKey" | "ctrlKey" | "altKey" | "shiftKey">,
+  shortcut: KeyboardShortcutMatch,
+) {
+  return (
+    event.code === `Key${shortcut.key.toUpperCase()}` &&
+    (IS_APPLE ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey) &&
+    event.altKey &&
+    event.shiftKey
+  );
+}
+
+function shortcutText(shortcut: KeyboardShortcutMatch) {
+  return formatKeyboardShortcut(shortcut).join(IS_APPLE ? "" : "+");
+}
+
 function ShellButton({
   label,
   pressed,
   unseen = false,
+  shortcut,
   onClick,
   children,
 }: {
@@ -69,6 +104,8 @@ function ShellButton({
   pressed: boolean;
   /** Something new since the panel was last open; shown as a dot, not a count. */
   unseen?: boolean;
+  /** Shown in the tooltip. */
+  shortcut?: KeyboardShortcutMatch;
   onClick: () => void;
   children: ReactNode;
 }) {
@@ -83,7 +120,8 @@ function ShellButton({
           aria-label={unseen ? `${label} (${t.newActivity})` : label}
           aria-pressed={pressed}
           className={cn(
-            "relative size-7",
+            // Narrow screens reach it from the ⋯ menu.
+            "relative size-7 max-md:hidden",
             pressed
               ? "bg-accent text-accent-foreground"
               : "text-muted-foreground",
@@ -101,6 +139,7 @@ function ShellButton({
       </TooltipTrigger>
       <TooltipContent side="bottom">
         {unseen ? `${label} · ${t.newActivity}` : label}
+        {shortcut ? <span className="ms-2 opacity-70">{shortcutText(shortcut)}</span> : null}
       </TooltipContent>
     </Tooltip>
   );
@@ -109,7 +148,9 @@ function ShellButton({
 /**
  * Page actions pinned to the editor's top-end corner, like Notion's page
  * actions: no header bar, just quiet icons that stay reachable while the
- * document scrolls. Import and export sit behind the overflow menu.
+ * document scrolls. Version history comes first, then comments (the order
+ * Jaggle Office's editors use); import and export sit behind the overflow
+ * menu, which on narrow screens holds the two panels as well.
  */
 export function ShellActions({
   showComments,
@@ -147,6 +188,8 @@ export function ShellActions({
   if (!showComments && !showVersionHistory && !showImport && !showExport) {
     return null;
   }
+  const panels = showComments || showVersionHistory;
+  const transfer = showImport || showExport;
 
   return (
     <div
@@ -155,27 +198,29 @@ export function ShellActions({
         floating && "rounded-lg bg-background/80 p-0.5 backdrop-blur-sm",
       )}
     >
-      {showComments ? (
-        <ShellButton
-          label={t.comments}
-          pressed={commentsOpen}
-          unseen={commentsUnseen}
-          onClick={onToggleComments}
-        >
-          <MessageSquare className="size-4" />
-        </ShellButton>
-      ) : null}
       {showVersionHistory ? (
         <ShellButton
           label={t.versionHistory}
           pressed={versionsOpen}
           unseen={versionsUnseen}
+          shortcut={PANEL_SHORTCUTS.versions}
           onClick={onToggleVersions}
         >
           <History className="size-4" />
         </ShellButton>
       ) : null}
-      {showImport || showExport ? (
+      {showComments ? (
+        <ShellButton
+          label={t.comments}
+          pressed={commentsOpen}
+          unseen={commentsUnseen}
+          shortcut={PANEL_SHORTCUTS.comments}
+          onClick={onToggleComments}
+        >
+          <MessageSquare className="size-4" />
+        </ShellButton>
+      ) : null}
+      {panels || transfer ? (
         <DropdownMenu modal={false}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -185,15 +230,40 @@ export function ShellActions({
                   size="icon"
                   variant="ghost"
                   aria-label={t.moreActions}
-                  className="size-7 text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
+                  className={cn(
+                    "relative size-7 text-muted-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+                    // Only the panels inside: wide screens have their buttons.
+                    !transfer && "md:hidden",
+                  )}
                 >
                   <MoreHorizontal className="size-4" />
+                  {commentsUnseen || versionsUnseen ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-1 right-1 size-1.5 rounded-full bg-primary ring-2 ring-background md:hidden"
+                    />
+                  ) : null}
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent side="bottom">{t.moreActions}</TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
+            {showVersionHistory ? (
+              <DropdownMenuItem className="md:hidden" onSelect={onToggleVersions}>
+                <History />
+                {t.versionHistory}
+                <span className="ms-auto text-xs text-muted-foreground">{shortcutText(PANEL_SHORTCUTS.versions)}</span>
+              </DropdownMenuItem>
+            ) : null}
+            {showComments ? (
+              <DropdownMenuItem className="md:hidden" onSelect={onToggleComments}>
+                <MessageSquare />
+                {t.comments}
+                <span className="ms-auto text-xs text-muted-foreground">{shortcutText(PANEL_SHORTCUTS.comments)}</span>
+              </DropdownMenuItem>
+            ) : null}
+            {panels && transfer ? <DropdownMenuSeparator className="md:hidden" /> : null}
             {showImport ? (
               <DropdownMenuItem onSelect={onImport}>
                 <Upload />
