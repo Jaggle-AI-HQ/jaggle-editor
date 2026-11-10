@@ -31,6 +31,7 @@ import { commentNodes } from "../lib/comment-nodes";
 import { commentTheme } from "../lib/theme";
 import type { LexicalEditorProps } from "../lib/types";
 import { EmojiPickerPlugin } from "../plugins/emoji-picker-plugin";
+import { MentionedUsersPlugin } from "../plugins/mentioned-users-plugin";
 import { MentionPlugin } from "../plugins/mention-plugin";
 import { ShortcutsPlugin } from "../plugins/shortcuts-plugin";
 
@@ -78,6 +79,8 @@ export default function CommentComposer({
   onCancel,
   onComment,
   mentionScope,
+  onMentionedUsersChange,
+  footer,
 }: LexicalEditorProps) {
   const prepared = useMemo(() => {
     if (initialEditorState) {
@@ -154,6 +157,7 @@ export default function CommentComposer({
             />
           </div>
           <CommentAttachmentArea />
+          {footer ? <div className="px-4 pb-1 pt-2">{footer}</div> : null}
           <CommentToolbar
             actionLabel={actionLabel}
             cancelLabel={cancelLabel}
@@ -169,6 +173,9 @@ export default function CommentComposer({
       <ShortcutsPlugin />
       <MentionPlugin scope={mentionScope} />
       <EmojiPickerPlugin />
+      {onMentionedUsersChange ? (
+        <MentionedUsersPlugin onChange={onMentionedUsersChange} />
+      ) : null}
     </LexicalExtensionComposer>
   );
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- The comment composer takes two optional props:
+  - `onMentionedUsersChange(userIds)` reports the people currently @mentioned in the draft (de-duplicated, only when
+    the set changes, `[]` once the draft is cleared or sent).
+  - `footer` renders a node inside the composer, below the editor and above the actions row, without taking focus.
+
 ## 0.6.0
 
 - The comments panel is laid out as Jaggle Office's (its paged documents, sheets, slides and PDFs), so comments look

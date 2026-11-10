@@ -57,6 +57,30 @@ mentionScope={{ type: "project", id: projectId }} // or { type: "workspace", id:
 A comment composer doesn't fall back to `workspaceId`. (The document editor does, and so do the composers inside
 its comment threads.) Without `mentionScope`, or without a `people` adapter, `@` lists nobody.
 
+### Who is mentioned in the draft
+
+`onMentionedUsersChange(userIds)` reports the people currently @mentioned in the draft, so the app can react before
+sending (for example, hint that someone is outside working hours). It gets the de-duplicated ids, in the order they
+first appear, only when that set changes (not on every keystroke), and `[]` once the draft is cleared or sent. A
+draft that starts with mentions (`mentionDraft`) reports them once on mount. Mentions of records are not people and
+are left out.
+
+## Footer
+
+`footer` is any React node the composer renders inside its frame, below the editor and attachment and above the
+actions row (the toolbar and Send). It is also shown on the composer's placeholder before it is first focused. It
+takes no focus of its own, so keep it to text or links.
+
+```tsx
+const [mentioned, setMentioned] = useState<string[]>([]);
+<LexicalEditor
+  mode="comment"
+  onMentionedUsersChange={setMentioned}
+  footer={mentioned.length ? <QuietHoursHint userIds={mentioned} /> : null}
+  /* … */
+/>
+```
+
 ## Attachments
 
 One image or file per comment, chosen with the paperclip, pasted, or dropped in:

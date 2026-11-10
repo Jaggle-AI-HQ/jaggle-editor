@@ -72,6 +72,7 @@ function DeferredCommentComposer(props: LexicalEditorProps) {
       >
         {placeholder}
       </div>
+      {props.footer ? <div className="px-4 pb-1 pt-2">{props.footer}</div> : null}
       <div className="h-12" />
     </div>
   );
