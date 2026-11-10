@@ -36,6 +36,7 @@ export function App() {
   const [dark, setDark] = useState(params.get("theme") === "dark");
   const [status, setStatus] = useState<DocumentSaveStatus>("idle");
   const [comments, setComments] = useState<string[]>([]);
+  const [mentioned, setMentioned] = useState<string[]>([]);
   const person = PEOPLE.find((candidate) => candidate.id === params.get("user")) ?? PEOPLE[0];
   const collaborationUrl = params.get("collab") === "1" ? "ws://localhost:1234" : undefined;
 
@@ -120,6 +121,12 @@ export function App() {
                 imageScope={{ entityType: "task", entityId: "demo-task" }}
                 actionLabel="Comment"
                 onComment={(_state, html) => setComments((current) => [...current, html])}
+                onMentionedUsersChange={setMentioned}
+                footer={
+                  <p className="text-xs text-muted-foreground" data-testid="mentioned-ids">
+                    Mentioned ids: {mentioned.length ? mentioned.join(", ") : "none"}
+                  </p>
+                }
               />
             </section>
           ) : null}

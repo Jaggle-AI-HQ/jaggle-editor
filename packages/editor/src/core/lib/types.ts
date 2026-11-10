@@ -163,4 +163,17 @@ export type LexicalEditorProps = {
   cancelLabel?: string;
   onCancel?: () => void;
   onComment?: CommentSubmitHandler;
+  /**
+   * Comment mode: the ids of the people currently @mentioned in the draft,
+   * de-duplicated. Called only when that set changes, and with `[]` once the
+   * draft is cleared or sent. Mentions of records (documents, tasks) are not
+   * people and are left out.
+   */
+  onMentionedUsersChange?: (userIds: string[]) => void;
+  /**
+   * Comment mode: content shown inside the composer, below the editor and
+   * above the actions row (e.g. a hint about notifications). It never takes
+   * focus from the editor on its own.
+   */
+  footer?: ReactNode;
 };

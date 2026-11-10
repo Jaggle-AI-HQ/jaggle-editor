@@ -123,6 +123,10 @@ function Editors({ children }: { children: React.ReactNode }) {
 
 The document editor and comment composer load on demand, along with Yjs, the emoji data and KaTeX. A page that only shows `readOnly` HTML doesn't load them.
 
+Comment mode also takes two optional props (see the [comment composer guide](docs/comment-composer.md)):
+- `onMentionedUsersChange(userIds: string[])`: the people currently @mentioned in the draft, de-duplicated, called only when the set changes and with `[]` once the draft is cleared or sent
+- `footer: ReactNode`: rendered inside the composer, below the editor and above the actions row, without taking focus
+
 Every prop is documented on `LexicalEditorProps`. Two props are required where they apply, because there is no route to infer them from:
 - `mentionScope` for mentions. A document editor falls back to `workspaceId`; a comment composer doesn't.
 - `imageScope` for uploads

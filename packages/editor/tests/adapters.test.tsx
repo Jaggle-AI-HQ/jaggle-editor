@@ -180,4 +180,32 @@ describe("adapters", () => {
     expect(list).toHaveBeenCalledTimes(1);
     expect(getReadState.mock.calls.length).toBeLessThanOrEqual(1);
   });
+
+  it("shows a comment composer's footer below the editor without taking focus", async () => {
+    const container = await mount(
+      { currentUser: me },
+      <LexicalEditor
+        mode="comment"
+        footer={<p data-testid="hint">Ada is outside working hours.</p>}
+        onMentionedUsersChange={vi.fn()}
+      />,
+    );
+    await editorLoaded(container);
+    const hint = container.querySelector('[data-testid="hint"]')!;
+    expect(hint).not.toBeNull();
+    const editable = container.querySelector("[contenteditable]")!;
+    expect(editable.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(hint.contains(document.activeElement)).toBe(false);
+  });
+
+  it("keeps the footer on a deferred composer's placeholder and after it loads", async () => {
+    const container = await mount(
+      { currentUser: me },
+      <LexicalEditor mode="comment" deferUntilFocus footer={<p data-testid="hint">Hint</p>} />,
+    );
+    expect(container.querySelector('[data-testid="hint"]')).not.toBeNull();
+    await act(async () => container.querySelector<HTMLElement>('[role="textbox"]')!.focus());
+    await editorLoaded(container);
+    expect(container.querySelector('[data-testid="hint"]')).not.toBeNull();
+  });
 });
